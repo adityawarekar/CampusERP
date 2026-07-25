@@ -1,9 +1,11 @@
 import express from "express";
+import logger from "./middleware/logger.middleware";
+import routes from "./routes/index.js"
 
 const app = express();
 
-app.get("/", (req, res) => {
-    res.send("Welcome to CampusERP Backend");
-});
+app.use(logger);
+app.use(routes);
+
 
 export default app;
