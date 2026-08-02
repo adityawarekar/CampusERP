@@ -1,9 +1,11 @@
 import { Router } from "express";
+import departmentRoutes from "./department.routes.js";
 
 import studentRoutes from  "./student.routes.js";
 
 const router = Router();
 
-router.use("/students", studentRoutes);
+router.use("/departments", departmentRoutes);
+
 
 export default router;
