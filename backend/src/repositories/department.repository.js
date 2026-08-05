@@ -72,7 +72,7 @@ class DepartmentRepository {
 
         const result = await pool.query(query, [id]);
 
-        return result.rows[0];
+        return result.rows[0]
     }
 }
 

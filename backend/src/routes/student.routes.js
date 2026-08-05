@@ -1,11 +1,8 @@
 import { Router } from "express";
+import studentController from "../controllers/student.controller.js";
 
 const router = Router();
 
-router.get("/", (req, res) => {
-    res.json({
-        message: "All students"
-    });
-});
+router.get("/", studentController.getAllStudents);
 
 export default router;
