@@ -10,7 +10,7 @@ class StudentService {
     async getStudentById(id) {
         const student = await studentRepository.findById(id);
 
-        if(!student) {
+        if (!student) {
             throw new Error("Student not found");
         }
         return student;
@@ -24,28 +24,28 @@ class StudentService {
         phoneNumber,
         departmentId
     ) {
-        const department = 
-           await departmentRepository.findById(departmentId);
-           
+        const department =
+            await departmentRepository.findById(departmentId);
+
         if (!department) {
             throw new Error("Department not found");
-        }   
+        }
 
         const existingRollNumber =
             await studentRepository.findByRollNumber(rollNumber);
-           
-        if(existingRollNumber) {
-            throw new Error("Roll number already exists");
-        }    
 
-        const existingEmail = 
+        if (existingRollNumber) {
+            throw new Error("Roll number already exists");
+        }
+
+        const existingEmail =
             await studentRepository.findByEmail(email);
-        
+
         if (existingEmail) {
             throw new Error("Email already exists");
         }
 
-        // Create student
+
         return await studentRepository.create(
             rollNumber,
             firstName,
@@ -56,7 +56,63 @@ class StudentService {
         );
     }
 
-    
+    async updateStudent(
+        id,
+        rollNumber,
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        departmentId
+    ) {
+        const student = await studentRepository.findById(id);
+
+        if (!student) {
+            throw new Error("Student not found");
+        }
+
+        const department = await departmentRepository.findById(departmentId);
+
+        if (!department) {
+            throw new Error("Department not found")
+        }
+
+        const existingRollNumber =
+            await studentRepository.findByRollNumberExceptId(rollNumber, id);
+
+        if (existingRollNumber) {
+            throw new Error("Roll number already exists");
+        }
+
+        const existingEmail =
+            await studentRepository.findByEmailExceptId(email, id);
+
+        if (existingEmail) {
+            throw new Error("Email already exists");
+        }
+
+        return await studentRepository.update(
+            id,
+            rollNumber,
+            firstName,
+            lastName,
+            email,
+            phoneNumber,
+            departmentId
+        );
+    }
+
+    async deleteStudents(id) {
+        const student = await studentRepository.findById(id);
+
+        if(!student) {
+            throw new Error("Student not found");
+        }
+
+        return await studentRepository.delete(id);
+    }
+
+
 
 }
 
