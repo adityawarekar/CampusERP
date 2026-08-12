@@ -53,6 +53,73 @@ class EnrollmentRepository {
 
         }
     }
+
+    async findAll() {
+
+        const query = `
+        SELECT
+            enrollments.id,
+
+            students.id AS student_id,
+            students.roll_number,
+            students.first_name || ' ' || students.last_name AS student_name,
+
+            courses.id AS course_id,
+            courses.name AS course_name,
+            courses.code AS course_code,
+            courses.credits,
+
+            enrollments.enrolled_at
+
+        FROM enrollments
+
+        INNER JOIN students
+            ON enrollments.student_id = students.id
+
+        INNER JOIN courses
+            ON enrollments.course_id = courses.id
+
+        ORDER BY enrollments.enrolled_at DESC;
+    `;
+
+        const result = await pool.query(query);
+
+        return result.rows;
+    }
+
+    async findById(id) {
+
+        const query = `
+        SELECT
+            enrollments.id,
+
+            students.id AS student_id,
+            students.roll_number,
+            students.first_name || ' ' || students.last_name AS student_name,
+
+            courses.id AS course_id,
+            courses.name AS course_name,
+            courses.code AS course_code,
+            courses.credits,
+
+            enrollments.enrolled_at
+
+        FROM enrollments
+
+        INNER JOIN students
+            ON enrollments.student_id = students.id
+
+        INNER JOIN courses
+            ON enrollments.course_id = courses.id
+
+        WHERE enrollments.id = $1;
+    `;
+
+        const result = await pool.query(query, [id]);
+
+        return result.rows[0];
+    }
+
 }
 
 export default new EnrollmentRepository();

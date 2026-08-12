@@ -39,6 +39,61 @@ class EnrollmentController {
 
         }
     }
+
+    async getAllEnrollments(req, res) {
+
+        try {
+
+            const enrollments =
+                await enrollmentService.getAllEnrollments();
+
+            return res.status(200).json({
+                success: true,
+                message: "Enrollments fetched successfully",
+                data: enrollments
+            });
+
+        } catch (error) {
+
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+
+        }
+
+    }
+
+    async getEnrollmentById(req, res) {
+
+        try {
+
+            const { id } = req.params;
+
+            const enrollment =
+                await enrollmentService.getEnrollmentById(id);
+
+            return res.status(200).json({
+                success: true,
+                data: enrollment
+            });
+
+        } catch (error) {
+
+            if (error.message === "Enrollment not found") {
+                return res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+
+        }
+    }
 }
 
 export default new EnrollmentController();

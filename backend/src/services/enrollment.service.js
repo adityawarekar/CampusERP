@@ -11,6 +11,24 @@ class EnrollmentService {
 
     }
 
+    async getAllEnrollments() {
+
+        return await enrollmentRepository.findAll();
+
+    }
+
+    async getEnrollmentById(id) {
+
+        const enrollment =
+            await enrollmentRepository.findById(id);
+
+        if (!enrollment) {
+            throw new Error("Enrollment not found");
+        }
+
+        return enrollment;
+    }
+
 }
 
 export default new EnrollmentService();
