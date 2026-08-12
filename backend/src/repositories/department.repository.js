@@ -34,11 +34,12 @@ class DepartmentRepository {
         `;
 
         const result = await pool.query(query, [name, code]);
+        return result.rows[0];
     }
 
     async findByCode(code) {
         const query = `
-            SELECT id, name code
+            SELECT id, name, code
             FROM departments
             WHERE code = $1;
         `;
