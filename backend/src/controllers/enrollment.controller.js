@@ -94,6 +94,33 @@ class EnrollmentController {
 
         }
     }
+
+    async deleteEnrollment(req, res) {
+        try {
+            const { id } = req.params;
+
+            const enrollment = 
+               await enrollmentService.deleteEnrollment(id);
+            
+            return res.status(200).json({
+                success: true,
+                message: "Enrollment deleted sucessfully",
+                data: enrollment
+            });   
+        } catch (error) {
+            if (error.message === "Enrollment not found") {
+                return res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
 }
 
 export default new EnrollmentController();

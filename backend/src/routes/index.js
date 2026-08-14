@@ -4,6 +4,8 @@ import studentRoutes from  "./student.routes.js";
 import attendanceRoutes from "./attendance.routes.js";
 import enrollmentRoutes from "./enrollment.routes.js";
 import courseRoutes from "./course.routes.js";
+import examRoutes from "./exam.routes.js";
+import resultRoutes from "./result.routes.js";
 
 const router = Router();
 
@@ -12,5 +14,7 @@ router.use("/students", studentRoutes);
 router.use("/attendance", attendanceRoutes);
 router.use("/enrollments", enrollmentRoutes);
 router.use("/courses", courseRoutes);
+router.use("/exams", examRoutes);
+router.use("/results", resultRoutes);
 
 export default router;

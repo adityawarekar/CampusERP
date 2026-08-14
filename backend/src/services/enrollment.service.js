@@ -29,6 +29,17 @@ class EnrollmentService {
         return enrollment;
     }
 
+    async deleteEnrollment(id) {
+        const enrollment = 
+          await enrollmentRepository.findById(id);
+        
+        if (!enrollment) {
+            throw new Error("Enrollment not found");
+        }  
+
+        return await enrollmentRepository.delete(id);
+    }
+
 }
 
 export default new EnrollmentService();

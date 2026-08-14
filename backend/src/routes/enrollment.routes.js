@@ -6,5 +6,7 @@ const router = Router();
 router.post("/", enrollmentController.enrollStudent);
 router.get("/", enrollmentController.getAllEnrollments);
 router.get("/:id", enrollmentController.getEnrollmentById);
+router.delete("/:id", enrollmentController.deleteEnrollment);
+
 
 export default router;

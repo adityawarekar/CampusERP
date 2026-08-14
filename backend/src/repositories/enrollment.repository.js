@@ -120,6 +120,22 @@ class EnrollmentRepository {
         return result.rows[0];
     }
 
+    async delete(id) {
+        const query = `
+            DELETE FROM enrollments
+            WHERE id = $1
+            RETURNING
+               id, 
+               student_id,
+               course_id
+               enrolled_at;
+        `;
+
+        const result = await pool.query(query, [id]);
+
+        return result.rows[0];
+    }
+
 }
 
 export default new EnrollmentRepository();
