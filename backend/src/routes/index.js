@@ -6,6 +6,7 @@ import enrollmentRoutes from "./enrollment.routes.js";
 import courseRoutes from "./course.routes.js";
 import examRoutes from "./exam.routes.js";
 import resultRoutes from "./result.routes.js";
+import feeRoutes from "./fee.routes.js";
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use("/enrollments", enrollmentRoutes);
 router.use("/courses", courseRoutes);
 router.use("/exams", examRoutes);
 router.use("/results", resultRoutes);
+router.use("/fees", feeRoutes);
 
 export default router;
