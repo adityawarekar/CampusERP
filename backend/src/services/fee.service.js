@@ -12,7 +12,7 @@ class FeeService {
             throw new Error("Fee record not found");
         }
 
-        return Fee;
+        return fee;
     }
 
     async createFee(
@@ -49,6 +49,30 @@ class FeeService {
             studentId,
             totalAmount,
             dueDate
+        );
+    }
+
+    async createPayment(
+        feeId,
+        amount,
+        paymentMethod
+    ) {
+        if (amount <= 0) {
+            throw new Error(
+                "Payment amount must be greater than zero"
+            );
+        }
+
+        if (!paymentMethod) {
+            throw new Error(
+                "Payment method is required"
+            );
+        }
+
+        return await feeRepository.createPayment(
+            feeId,
+            amount,
+            paymentMethod
         );
     }
 }

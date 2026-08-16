@@ -60,7 +60,7 @@ class FeeController {
             } = req.body;
 
             const fee =
-                await feeService.createFee(
+                await feeService.createfee(
                     studentId,
                     totalAmount,
                     dueDate
@@ -88,6 +88,59 @@ class FeeController {
                 "Fee record already exists for this student"
             ) {
 
+                return res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
+
+    async createPayment(req, res) {
+        try {
+            const { feeId } = req.params;
+
+            const {
+                amount,
+                paymentMethod
+            } = req.body;
+
+            const payment =
+                await feeService.createPayment(
+                    feeId,
+                    amount,
+                    paymentMethod
+                );
+
+            return res.status(201).json({
+                success: true,
+                message: "Payment created successfully",
+                data: payment
+            });
+        } catch (error) {
+            if (
+                error.message ===
+                "Fee record not found"
+            ) {
+                return res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+
+            if (
+                error.message ===
+                "Payment amount must be greater than zero" ||
+                error.message ===
+                "Payment method is required" ||
+                error.message ===
+                "Payment exceeds remaining fee"
+            ) {
                 return res.status(400).json({
                     success: false,
                     message: error.message

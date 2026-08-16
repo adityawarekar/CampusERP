@@ -58,7 +58,7 @@ class FeeRepository {
          `;
 
         const result = await pool.query(query, [studentId]);
-        
+
 
         return result.rows[0];
     }
@@ -103,6 +103,101 @@ class FeeRepository {
             dueDate
         ]);
         return result.rows[0];
+    }
+
+
+    async createPayment(feeId, amount, paymentMethod) {
+        const client = await pool.connect();
+
+        try {
+            await client.query("BEGIN");
+
+            const feeResult = await client.query(
+                `
+                SELECT
+                    id,
+                    total_amount,
+                    amount_paid
+                FROM fee_records
+                WHERE id = $1
+                FOR UPDATE;    
+                
+                `,
+                [feeId]
+            );
+
+            if (feeResult.rows.length === 0) {
+                throw new Error("Fee record not found");
+            }
+
+            const fee = feeResult.rows[0];
+
+            const remainingAmount =
+                Number(fee.total_amount) -
+                Number(fee.amount_paid);
+
+            if (amount > remainingAmount) {
+                throw new Error(
+                    "Payment exceeds remaining fee"
+                );
+            }
+
+            const paymentResult = await client.query(
+                `
+                INSERT INTO payments (
+                    fee_id,
+                    amount,
+                    payment_method
+                )
+                VALUES ($1, $2, $3)
+                RETURNING
+                    id,
+                    fee_id,
+                    amount,
+                    payment_date,
+                    payment_method;
+                    
+                `,
+                [feeId, amount, paymentMethod]
+            );
+
+            const newAmountPaid =
+                Number(fee.amount_paid) +
+                Number(amount);
+
+            const newStatus =
+                newAmountPaid === Number(fee.total_amount)
+                    ? "Paid"
+                    : "Partial";
+
+            await client.query(
+                `
+                UPDATE fee_records
+                SET
+                   amount_paid = $2,
+                   status = $3,
+                   updated_at = CURRENT_TIMESTAMP
+                WHERE id = $1;   
+                
+                `,
+                [
+                    feeId,
+                    newAmountPaid,
+                    newStatus
+                ]
+            );
+
+            await client.query("COMMIT");
+
+            return paymentResult.rows[0];
+
+        } catch (error) {
+            await client.query("ROLLBACK");
+
+            throw error;
+        } finally {
+            client.release();
+        }
     }
 
 }
