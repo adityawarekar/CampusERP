@@ -200,6 +200,86 @@ class FeeRepository {
         }
     }
 
+    async findPaymentsByFeeId(feeId) {
+
+        const query = `
+        SELECT
+            payments.id,
+            payments.fee_id,
+            payments.amount,
+            payments.payment_date,
+            payments.payment_method
+        FROM payments
+        WHERE payments.fee_id = $1
+        ORDER BY payments.payment_date DESC;
+    `;
+
+        const result = await pool.query(query, [feeId]);
+
+        return result.rows;
+    }
+
+    async update(id, totalAmount, dueDate) {
+        const query = `
+            UPDATE fee_records
+            SET
+                total_amount = $2,
+                due_date = $3,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $1
+            RETURNING
+                id,
+                student_id,
+                total_amount,
+                amount_paid,
+                due_date,
+                status,
+                updated_at;       
+        `;
+
+        const result = await pool.query(query, [
+            id,
+            totalAmount,
+            dueDate
+        ]);
+
+        return result.rows[0];
+    }
+
+    async findPaymentsByFeeId(feeId) {
+
+        const query = `
+        SELECT id
+        FROM payments
+        WHERE fee_id = $1;
+    `;
+
+        const result = await pool.query(query, [feeId]);
+
+        return result.rows;
+    }
+
+    async delete(id) {
+
+        const query = `
+        DELETE FROM fee_records
+        WHERE id = $1
+        RETURNING
+            id,
+            student_id,
+            total_amount,
+            amount_paid,
+            due_date,
+            status;
+    `;
+
+        const result = await pool.query(query, [id]);
+
+        return result.rows[0];
+    }
+
+
+
 }
 
 export default new FeeRepository();

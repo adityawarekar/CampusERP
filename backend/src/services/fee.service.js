@@ -21,12 +21,12 @@ class FeeService {
         dueDate
     ) {
 
-        
+
 
         const student =
             await feeRepository.findStudentById(studentId);
 
-        
+
 
         if (!student) {
             throw new Error("Student not found");
@@ -74,6 +74,61 @@ class FeeService {
             amount,
             paymentMethod
         );
+    }
+
+    async getPaymentsByFeeId(feeId) {
+        const fee =
+            await feeRepository.findById(feeId);
+
+        if (!fee) {
+            throw new Error("Fee record not found");
+        }
+
+        return await feeRepository.findPaymentsByFeeId(feeId);
+    }
+
+    async updateFee(id, totalAmount, dueDate) {
+        const fee =
+            await feeRepository.findById(id);
+
+        if (!fee) {
+            throw new Error("Fee record not found");
+        }
+
+        if (totalAmount < fee.amount_paid) {
+            throw new Error(
+                "Total amount cannot be less than amount already paid"
+            );
+        }
+
+        return await feeRepository.update(
+            id,
+            totalAmount,
+            dueDate
+        );
+    }
+
+    async deleteFee(id) {
+        const fee =
+            await feeRepository.findById(id);
+
+        if (!fee) {
+            throw new Error("Fee record not found");
+        }
+
+        const payments =
+            await feeRepository.findPaymentsByFeeId(id);
+
+        if (payments.length > 0) {
+            throw new Error(
+                "Cannot delete fee record with existing payments"
+            );
+        }
+        return await feeRepository.delete(id);
+
+
+
+
     }
 }
 
