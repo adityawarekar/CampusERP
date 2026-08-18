@@ -7,6 +7,8 @@ import courseRoutes from "./course.routes.js";
 import examRoutes from "./exam.routes.js";
 import resultRoutes from "./result.routes.js";
 import feeRoutes from "./fee.routes.js";
+import bookRoutes from "./book.routes.js";
+
 
 const router = Router();
 
@@ -18,5 +20,7 @@ router.use("/courses", courseRoutes);
 router.use("/exams", examRoutes);
 router.use("/results", resultRoutes);
 router.use("/fees", feeRoutes);
+router.use("/books", bookRoutes);
+
 
 export default router;
