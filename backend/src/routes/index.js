@@ -10,6 +10,7 @@ import feeRoutes from "./fee.routes.js";
 import bookRoutes from "./book.routes.js";
 import bookIssueRoutes from "./bookIssue.routes.js";
 import hostelRoutes from "./hostel.routes.js";
+import roomRoutes from "./room.routes.js";
 
 
 const router = Router();
@@ -25,6 +26,7 @@ router.use("/fees", feeRoutes);
 router.use("/books", bookRoutes);
 router.use("/book-issues", bookIssueRoutes);
 router.use("/hostels", hostelRoutes);
+router.use("/rooms", roomRoutes);
 
 
 export default router;
