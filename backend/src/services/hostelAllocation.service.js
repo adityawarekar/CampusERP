@@ -82,6 +82,55 @@ class HostelAllocationService {
             );
     }
 
+    async getAllAllocations() {
+        return await hostelAllocationRepository
+            .findAll();
+    }
+
+    async getAllAllocationById(id) {
+
+        console.log("1️⃣ Service started:", id);
+        const allocation =
+            await hostelAllocationRepository.findById(id);
+
+        console.log(
+            "2️⃣ Repository returned:",
+            allocation
+        );
+        if (!allocation) {
+            throw new Error(
+                "Hostel allocation not found"
+            );
+        }
+        return allocation;
+    }
+
+    async vacatedAllocation(id) {
+        return await hostelAllocationRepository
+            .vacateAllocation(id);
+    }
+
+    async getAllocationsByStudentId(studentId) {
+
+        const student =
+            await hostelAllocationRepository
+                .findStudentById(studentId);
+
+        if (!student) {
+            throw new Error(
+                "Student not found"
+            );
+        }
+
+        return await hostelAllocationRepository
+            .findByStudentId(studentId);
+    }
+
+    async getActiveAllocation() {
+        return await hostelAllocationRepository
+            .findActive();
+    }
+
 }
 
 export default new HostelAllocationService();
