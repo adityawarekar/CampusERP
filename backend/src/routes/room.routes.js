@@ -9,6 +9,10 @@ router.get(
     roomController.getAllRooms
 );
 router.get(
+    "/availability",
+    roomController.getRoomAvailability
+);
+router.get(
     "/:id",
     roomController.getRoomsById
 );
@@ -16,6 +20,7 @@ router.post(
     "/",
     roomController.createRoom
 );
+
 router.put(
     "/:id",
     roomController.updateRoom

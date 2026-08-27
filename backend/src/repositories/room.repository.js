@@ -231,6 +231,38 @@ class RoomRepository {
 
         return result.rows[0];
     }
+    async findAvailability() {
+
+        const query = `
+        SELECT
+            rooms.id,
+            rooms.hostel_id,
+            hostels.name AS hostel_name,
+            hostels.location AS hostel_location,
+
+            rooms.room_number,
+            rooms.capacity,
+            rooms.occupied_beds,
+
+            rooms.capacity - rooms.occupied_beds
+                AS available_beds
+
+        FROM rooms
+
+        INNER JOIN hostels
+            ON rooms.hostel_id = hostels.id
+
+        ORDER BY
+            hostels.name,
+            rooms.room_number;
+    `;
+
+        const result = await pool.query(query);
+
+        return result.rows;
+    }
+
+
 }
 
 export default new RoomRepository();

@@ -195,6 +195,24 @@ class RoomController {
         });
     }
 
+    async getRoomAvailability(req, res) {
+        try {
+            const rooms = 
+               await roomService.getRoomAvailability();
+            
+            return res.status(200).json({
+                success: true,
+                message: "Room availability fetched successfully",
+                data: rooms
+            });   
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
+
 
 }
 
