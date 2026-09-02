@@ -60,7 +60,7 @@ class FeeController {
             } = req.body;
 
             const fee =
-                await feeService.createfee(
+                await feeService.createFee(
                     studentId,
                     totalAmount,
                     dueDate

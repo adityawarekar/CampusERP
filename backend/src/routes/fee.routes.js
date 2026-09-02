@@ -4,7 +4,8 @@ import feeController from "../controllers/fee.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
 import roleMiddleware from "../middleware/role.middleware.js";
-
+import feeOwnershipMiddleware from "../middleware/feeOwnership.middleware.js";
+import paymentOwnershipMiddleware from "../middleware/paymentOwnership.middleware.js";
 const router = Router();
 
 router.get(
@@ -24,6 +25,7 @@ router.get(
         "ADMIN",
         "STUDENT"
     ),
+    feeOwnershipMiddleware,
     feeController.getFeeById
 );
 
@@ -41,6 +43,7 @@ router.post(
         "ADMIN",
         "STUDENT"
     ),
+    paymentOwnershipMiddleware,
     feeController.createPayment
 );
 
@@ -51,6 +54,7 @@ router.get(
         "ADMIN",
         "STUDENT"
     ),
+    paymentOwnershipMiddleware,
     feeController.getPaymentsByFeeId
 );
 

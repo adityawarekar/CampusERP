@@ -4,6 +4,7 @@ import bookIssueController from "../controllers/bookIssue.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
 import roleMiddleware from "../middleware/role.middleware.js";
+import bookIssueOwnershipMiddleware from "../middleware/bookIssueOwnership.middleware.js";
 
 const router = Router();
 
@@ -45,6 +46,7 @@ router.get(
         "LIBRARY_STAFF",
         "STUDENT"
     ),
+    bookIssueOwnershipMiddleware,
     bookIssueController.getBookIssuesByStudentId
 );
 

@@ -17,8 +17,11 @@ class AttendanceService {
         return attendance;
     }
 
-    async getStudentAttendanceSummary() {
-        return await attendanceRepository.getStudentAttendanceSummary();
+    async getStudentAttendanceSummary(studentId) {
+
+        return await attendanceRepository
+            .getStudentAttendanceSummary(studentId);
+
     }
 
     async getLowAttendanceStudents() {

@@ -2,9 +2,18 @@ import resultRepository from "../repositories/result.repository.js";
 
 class ResultService {
 
-    async getAllResults() {
+    async getAllResults(userId, role) {
 
-        return await resultRepository.findAll();
+        if (
+            role === "ADMIN" ||
+            role === "FACULTY"
+        ) {
+            return await resultRepository.findAll();
+        }
+
+        return await resultRepository.findAllByUserId(
+            userId
+        );
 
     }
 
@@ -102,12 +111,12 @@ class ResultService {
     }
 
     async deleteResult(id) {
-        const result = 
-           await resultRepository.findById(id);
-        
+        const result =
+            await resultRepository.findById(id);
+
         if (!result) {
             throw new Error("Result not found");
-        }   
+        }
 
         return await resultRepository.delete(id);
     }

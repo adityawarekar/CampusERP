@@ -7,7 +7,10 @@ class ResultController {
         try {
 
             const results =
-                await resultService.getAllResults();
+                await resultService.getAllResults(
+                    req.user.id,
+                    req.user.role
+                );
 
             return res.status(200).json({
                 success: true,
@@ -193,36 +196,7 @@ class ResultController {
         }
     }
 
-    async getHostelById(req, res) {
 
-        try {
-
-            const { id } = req.params;
-
-            const hostel =
-                await hostelService.getHostelById(id);
-
-            return res.status(200).json({
-                success: true,
-                data: hostel
-            });
-
-        } catch (error) {
-
-            if (error.message === "Hostel not found") {
-
-                return res.status(404).json({
-                    success: false,
-                    message: error.message
-                });
-            }
-
-            return res.status(500).json({
-                success: false,
-                message: error.message
-            });
-        }
-    }
 
 
 

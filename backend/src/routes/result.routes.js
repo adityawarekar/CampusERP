@@ -4,6 +4,8 @@ import resultController from "../controllers/result.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
 import roleMiddleware from "../middleware/role.middleware.js";
+import resultOwnershipMiddleware
+    from "../middleware/resultOwnership.middleware.js";
 
 const router = Router();
 
@@ -26,6 +28,7 @@ router.get(
         "FACULTY",
         "STUDENT"
     ),
+    resultOwnershipMiddleware,
     resultController.getResultById
 );
 

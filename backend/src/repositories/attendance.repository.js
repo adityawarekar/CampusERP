@@ -46,7 +46,7 @@ class AttendanceRepository {
         return result.rows[0];
     }
 
-    async getStudentAttendanceSummary() {
+    async getStudentAttendanceSummary(studentId) {
 
         const query = `
         SELECT
@@ -70,20 +70,17 @@ class AttendanceRepository {
                 END
             ) AS absent,
 
-            
             COALESCE(
-
-            (
-                COUNT(
-                    CASE
-                       WHEN attendance.status = 'Present'
-                       THEN 1
-                    END
-
-                ) * 100.0
-                / NULLIF(COUNT(attendance.id), 0)
-            ),
-            0
+                (
+                    COUNT(
+                        CASE
+                            WHEN attendance.status = 'Present'
+                            THEN 1
+                        END
+                    ) * 100.0
+                    / NULLIF(COUNT(attendance.id), 0)
+                ),
+                0
             ) AS attendance_percentage
 
         FROM students
@@ -91,20 +88,22 @@ class AttendanceRepository {
         LEFT JOIN attendance
             ON students.id = attendance.student_id
 
+        WHERE students.id = $1
+
         GROUP BY
             students.id,
             students.roll_number,
             students.first_name,
-            students.last_name
-
-        ORDER BY students.roll_number;
+            students.last_name;
     `;
 
-        const result = await pool.query(query);
+        const result = await pool.query(
+            query,
+            [studentId]
+        );
 
-        return result.rows;
+        return result.rows[0];
     }
-
     async getLowAttendanceStudents() {
 
         const query = `

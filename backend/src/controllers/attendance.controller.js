@@ -60,8 +60,12 @@ class AttendanceController {
 
         try {
 
+            const { studentId } = req.params;
+
             const summary =
-                await attendanceService.getStudentAttendanceSummary();
+                await attendanceService.getStudentAttendanceSummary(
+                    studentId
+                );
 
             return res.status(200).json({
                 success: true,
@@ -103,7 +107,7 @@ class AttendanceController {
         }
 
     }
- 
+
 }
 
 export default new AttendanceController();
