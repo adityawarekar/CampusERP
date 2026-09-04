@@ -4,6 +4,8 @@ import enrollmentController from "../controllers/enrollment.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
 import roleMiddleware from "../middleware/role.middleware.js";
+import enrollmentOwnershipMiddleware
+    from "../middleware/enrollmentOwnership.middleware.js";
 
 const router = Router();
 
@@ -36,6 +38,7 @@ router.get(
         "FACULTY",
         "STUDENT"
     ),
+    enrollmentOwnershipMiddleware,
     enrollmentController.getEnrollmentById
 );
 

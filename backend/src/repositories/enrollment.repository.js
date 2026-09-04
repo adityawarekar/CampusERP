@@ -87,6 +87,46 @@ class EnrollmentRepository {
         return result.rows;
     }
 
+    async findAllByUserId(userId) {
+
+        const query = `
+        SELECT
+            enrollments.id,
+
+            students.id AS student_id,
+            students.roll_number,
+            students.first_name || ' ' || students.last_name AS student_name,
+
+            courses.id AS course_id,
+            courses.name AS course_name,
+            courses.code AS course_code,
+            courses.credits,
+
+            enrollments.enrolled_at
+
+        FROM enrollments
+
+        INNER JOIN students
+            ON enrollments.student_id = students.id
+
+        INNER JOIN courses
+            ON enrollments.course_id = courses.id
+
+        WHERE students.user_id = $1
+
+        ORDER BY enrollments.enrolled_at DESC;
+    `;
+
+        const result = await pool.query(
+            query,
+            [userId]
+        );
+
+        return result.rows;
+    }
+
+
+
     async findById(id) {
 
         const query = `
@@ -127,7 +167,7 @@ class EnrollmentRepository {
             RETURNING
                id, 
                student_id,
-               course_id
+               course_id,
                enrolled_at;
         `;
 

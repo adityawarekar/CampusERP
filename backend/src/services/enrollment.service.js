@@ -11,10 +11,18 @@ class EnrollmentService {
 
     }
 
-    async getAllEnrollments() {
+    async getAllEnrollments(userId, role) {
 
-        return await enrollmentRepository.findAll();
+        if (
+            role === "ADMIN" ||
+            role === "FACULTY"
+        ) {
+            return await enrollmentRepository.findAll();
+        }
 
+        return await enrollmentRepository.findAllByUserId(
+            userId
+        );
     }
 
     async getEnrollmentById(id) {
@@ -30,12 +38,12 @@ class EnrollmentService {
     }
 
     async deleteEnrollment(id) {
-        const enrollment = 
-          await enrollmentRepository.findById(id);
-        
+        const enrollment =
+            await enrollmentRepository.findById(id);
+
         if (!enrollment) {
             throw new Error("Enrollment not found");
-        }  
+        }
 
         return await enrollmentRepository.delete(id);
     }
