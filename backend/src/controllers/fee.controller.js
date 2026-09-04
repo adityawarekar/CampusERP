@@ -4,7 +4,10 @@ class FeeController {
     async getAllFees(req, res) {
         try {
             const fees =
-                await feeService.getAllFees();
+                await feeService.getAllFees(
+                    req.user.id,
+                    req.user.role
+                );
             return res.status(200).json({
                 success: true,
                 message: "Fees fetched successfully",

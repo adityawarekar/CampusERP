@@ -26,6 +26,31 @@ class FeeRepository {
         return result.rows;
     }
 
+    async findAllByUserId(userId) {
+
+        const query = `
+        SELECT
+            fee_records.id,
+            students.id AS student_id,
+            students.roll_number,
+            students.first_name || ' ' || students.last_name AS student_name,
+            fee_records.total_amount,
+            fee_records.amount_paid,
+            fee_records.total_amount - fee_records.amount_paid AS remaining_amount,
+            fee_records.due_date,
+            fee_records.status
+        FROM fee_records
+        INNER JOIN students
+            ON fee_records.student_id = students.id
+        WHERE students.user_id = $1
+        ORDER BY fee_records.id;
+    `;
+
+        const result = await pool.query(query, [userId]);
+
+        return result.rows;
+    }
+
     async findById(id) {
 
         const query = `

@@ -1,9 +1,18 @@
 import feeRepository from "../repositories/fee.repository.js";
 
 class FeeService {
-    async getAllFees() {
+    async getAllFees(userId, role) {
+
+    if (
+        role === "ADMIN"
+    ) {
         return await feeRepository.findAll();
     }
+
+    return await feeRepository.findAllByUserId(
+        userId
+    );
+}
 
     async getFeeById(id) {
         const fee = await feeRepository.findById(id);

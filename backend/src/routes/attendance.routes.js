@@ -6,7 +6,15 @@ import attendanceOwnershipMiddleware from "../middleware/attendanceOwnership.mid
 
 const router = Router();
 
-router.get("/", attendanceController.getAllAttendance);
+router.get(
+    "/",
+    authMiddleware,
+    roleMiddleware(
+        "ADMIN",
+        "FACULTY"
+    ),
+    attendanceController.getAllAttendance
+);
 router.get(
     "/summary/:studentId",
     authMiddleware,
@@ -17,7 +25,15 @@ router.get(
     attendanceOwnershipMiddleware,
     attendanceController.getStudentAttendanceSummary
 );
-router.get("/low-attendance", attendanceController.getLowAttendanceStudents);
+router.get(
+    "/low-attendance",
+    authMiddleware,
+    roleMiddleware(
+        "ADMIN",
+        "FACULTY"
+    ),
+    attendanceController.getLowAttendanceStudents
+);
 router.get(
     "/:id",
     authMiddleware,
