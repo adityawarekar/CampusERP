@@ -10,6 +10,9 @@ import roleMiddleware
     from "../middleware/role.middleware.js";
 import studentOwnershipMiddleware
     from "../middleware/studentOwnership.middleware.js";
+
+import hostelAllocationOwnershipMiddleware
+    from "../middleware/hostelAllocationOwnership.middleware.js";    
 const router = Router();
 
 router.get(
@@ -62,6 +65,7 @@ router.get(
         "HOSTEL_STAFF",
         "STUDENT"
     ),
+    hostelAllocationOwnershipMiddleware,
     hostelAllocationController.getAllAllocationById
 );
 
