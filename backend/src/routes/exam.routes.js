@@ -4,6 +4,12 @@ import examController from "../controllers/exam.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
 import roleMiddleware from "../middleware/role.middleware.js";
+import validate from "../middleware/validation.middleware.js";
+
+import {
+    createExamSchema,
+    updateExamSchema
+} from "../validators/exam.validator.js";
 
 const router = Router();
 
@@ -36,6 +42,7 @@ router.post(
         "ADMIN",
         "FACULTY"
     ),
+    validate(createExamSchema),
     examController.createExam
 );
 
@@ -46,6 +53,7 @@ router.put(
         "ADMIN",
         "FACULTY"
     ),
+    validate(updateExamSchema),
     examController.updateExam
 );
 

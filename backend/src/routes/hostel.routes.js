@@ -4,6 +4,13 @@ import hostelController from "../controllers/hostel.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
 import roleMiddleware from "../middleware/role.middleware.js";
+import validate
+    from "../middleware/validation.middleware.js";
+
+import {
+    createHostelSchema,
+    updateHostelSchema
+} from "../validators/hostel.validator.js";
 
 const router = Router();
 
@@ -36,6 +43,7 @@ router.post(
         "ADMIN",
         "HOSTEL_STAFF"
     ),
+    validate(createHostelSchema),
     hostelController.createHostel
 );
 
@@ -46,6 +54,7 @@ router.put(
         "ADMIN",
         "HOSTEL_STAFF"
     ),
+    validate(updateHostelSchema),
     hostelController.updateHostel
 );
 

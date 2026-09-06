@@ -5,6 +5,13 @@ import departmentController from "../controllers/department.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
 import roleMiddleware from "../middleware/role.middleware.js";
+import validate
+    from "../middleware/validation.middleware.js";
+
+import {
+    createDepartmentSchema,
+    updateDepartmentSchema
+} from "../validators/department.validator.js";
 
 const router = Router();
 
@@ -37,6 +44,7 @@ router.post(
         "ADMIN",
         "FACULTY"
     ),
+    validate(createDepartmentSchema),
     departmentController.createDepartment
 );
 
@@ -47,6 +55,7 @@ router.put(
         "ADMIN",
         "FACULTY"
     ),
+    validate(updateDepartmentSchema),
     departmentController.updateDepartment
 );
 

@@ -4,6 +4,12 @@ import courseController from "../controllers/course.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
 import roleMiddleware from "../middleware/role.middleware.js";
+import validate from "../middleware/validation.middleware.js";
+
+import {
+    createCourseSchema,
+    updateCourseSchema
+} from "../validators/course.validator.js";
 
 const router = Router();
 
@@ -36,6 +42,7 @@ router.post(
         "ADMIN",
         "FACULTY"
     ),
+    validate(createCourseSchema),
     courseController.createCourse
 );
 
@@ -46,6 +53,7 @@ router.put(
         "ADMIN",
         "FACULTY"
     ),
+    validate(updateCourseSchema),
     courseController.updateCourse
 );
 

@@ -6,6 +6,13 @@ import authMiddleware from "../middleware/auth.middleware.js";
 import roleMiddleware from "../middleware/role.middleware.js";
 import feeOwnershipMiddleware from "../middleware/feeOwnership.middleware.js";
 import paymentOwnershipMiddleware from "../middleware/paymentOwnership.middleware.js";
+import validate from "../middleware/validation.middleware.js";
+
+import {
+    createFeeSchema,
+    createPaymentSchema,
+    updateFeeSchema
+} from "../validators/fee.validator.js";
 const router = Router();
 
 router.get(
@@ -33,6 +40,7 @@ router.post(
     "/",
     authMiddleware,
     roleMiddleware("ADMIN"),
+    validate(createFeeSchema),
     feeController.createFee
 );
 
@@ -44,6 +52,7 @@ router.post(
         "STUDENT"
     ),
     paymentOwnershipMiddleware,
+    validate(createPaymentSchema),
     feeController.createPayment
 );
 
@@ -62,6 +71,7 @@ router.put(
     "/:id",
     authMiddleware,
     roleMiddleware("ADMIN"),
+    validate(updateFeeSchema),
     feeController.updateFee
 );
 

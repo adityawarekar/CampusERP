@@ -4,6 +4,13 @@ import bookController from "../controllers/book.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
 import roleMiddleware from "../middleware/role.middleware.js";
+import validate
+    from "../middleware/validation.middleware.js";
+
+import {
+    createBookSchema,
+    updateBookSchema
+} from "../validators/book.validator.js";
 
 const router = Router();
 
@@ -25,6 +32,7 @@ router.post(
         "ADMIN",
         "LIBRARY_STAFF"
     ),
+    validate(createBookSchema),
     bookController.createBook
 );
 
@@ -46,6 +54,7 @@ router.put(
         "ADMIN",
         "LIBRARY_STAFF"
     ),
+    validate(updateBookSchema),
     bookController.updateBook
 );
 

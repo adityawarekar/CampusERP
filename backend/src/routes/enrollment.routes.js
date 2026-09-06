@@ -7,6 +7,13 @@ import roleMiddleware from "../middleware/role.middleware.js";
 import enrollmentOwnershipMiddleware
     from "../middleware/enrollmentOwnership.middleware.js";
 
+import validate from "../middleware/validation.middleware.js";
+
+import {
+    createEnrollmentSchema
+} from "../validators/enrollment.validator.js";
+
+
 const router = Router();
 
 router.post(
@@ -16,9 +23,9 @@ router.post(
         "ADMIN",
         "FACULTY"
     ),
+    validate(createEnrollmentSchema),
     enrollmentController.enrollStudent
 );
-
 router.get(
     "/",
     authMiddleware,
@@ -41,6 +48,9 @@ router.get(
     enrollmentOwnershipMiddleware,
     enrollmentController.getEnrollmentById
 );
+
+
+
 
 router.delete(
     "/:id",
