@@ -12,7 +12,14 @@ import studentOwnershipMiddleware
     from "../middleware/studentOwnership.middleware.js";
 
 import hostelAllocationOwnershipMiddleware
-    from "../middleware/hostelAllocationOwnership.middleware.js";    
+    from "../middleware/hostelAllocationOwnership.middleware.js";  
+    
+import validate
+    from "../middleware/validation.middleware.js";
+
+import {
+    createHostelAllocationSchema
+} from "../validators/hostelAllocation.validator.js";    
 const router = Router();
 
 router.get(
@@ -32,6 +39,7 @@ router.post(
         "ADMIN",
         "HOSTEL_STAFF"
     ),
+    validate(createHostelAllocationSchema),
     hostelAllocationController.createAllocation
 );
 
