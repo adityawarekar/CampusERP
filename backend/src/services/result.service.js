@@ -2,19 +2,33 @@ import resultRepository from "../repositories/result.repository.js";
 
 class ResultService {
 
-    async getAllResults(userId, role) {
+    async getAllResults(
+        userId,
+        role,
+        page = 1,
+        limit = 10,
+        studentId = null,
+        examId = null
+    ) {
+
+        const offset = (page - 1) * limit;
 
         if (
             role === "ADMIN" ||
             role === "FACULTY"
         ) {
-            return await resultRepository.findAll();
+
+            return await resultRepository.findAll(
+                limit,
+                offset,
+                studentId,
+                examId
+            );
         }
 
         return await resultRepository.findAllByUserId(
             userId
         );
-
     }
 
     async getResultById(id) {

@@ -2,28 +2,44 @@ import pool from "../config/db.js";
 
 class ExamRepository {
 
-    async findAll() {
+    async findAll(limit, offset, courseId, search) {
 
         const query = `
-            SELECT
-                exams.id,
-                exams.exam_name,
-                exams.exam_date,
-                exams.max_marks,
+        SELECT
+            exams.id,
+            exams.exam_name,
+            exams.exam_date,
+            exams.max_marks,
 
-                courses.id AS course_id,
-                courses.name AS course_name,
-                courses.code AS course_code
+            courses.id AS course_id,
+            courses.name AS course_name,
+            courses.code AS course_code
 
-            FROM exams
+        FROM exams
 
-            INNER JOIN courses
-                ON exams.course_id = courses.id
+        INNER JOIN courses
+            ON exams.course_id = courses.id
 
-            ORDER BY exams.exam_date;
-        `;
+        WHERE
+            (
+                $3::integer IS NULL
+                OR exams.course_id = $3::integer
+            )
+            AND
+            (
+                $4::text IS NULL
+                OR exams.exam_name ILIKE '%' || $4::text || '%'
+            )
 
-        const result = await pool.query(query);
+        ORDER BY exams.exam_date
+        LIMIT $1
+        OFFSET $2
+    `;
+
+        const result = await pool.query(
+            query,
+            [limit, offset, courseId, search]
+        );
 
         return result.rows;
     }

@@ -2,23 +2,35 @@ import pool from "../config/db.js";
 
 class StudentRepository {
 
-    async findAll() {
+    async findAll(limit, offset, departmentId, search) {
 
         const query = `
-            SELECT
-                students.id,
-                students.roll_number,
-                students.first_name || ' ' || students.last_name AS name, 
-                students.email,
-                departments.name AS department
-            FROM students
-            INNER JOIN departments
-            ON students.department_id = departments.id
-            ORDER BY students.roll_number;
+        SELECT
+            students.id,
+            students.roll_number,
+            students.first_name || ' ' || students.last_name AS name,
+            students.email,
+            departments.name AS department
+        FROM students
+        INNER JOIN departments
+        ON students.department_id = departments.id
+        WHERE
+            ($3::integer IS NULL OR students.department_id = $3::integer)
+            AND
+            (
+                $4::text IS NULL
+                OR students.first_name || ' ' || students.last_name ILIKE '%' || $4::text || '%'
+                OR students.email ILIKE '%' || $4::text || '%'
+            )
+        ORDER BY students.roll_number
+        LIMIT $1
+        OFFSET $2
+    `;
 
-        `;
-
-        const result = await pool.query(query);
+        const result = await pool.query(
+            query,
+            [limit, offset, departmentId, search]
+        );
 
         return result.rows;
     }
@@ -178,7 +190,7 @@ class StudentRepository {
 
         return result.rows[0];
     }
-     
+
     async delete(id) {
         const query = `
             DELETE FROM students

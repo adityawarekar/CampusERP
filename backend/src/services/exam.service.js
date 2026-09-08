@@ -1,8 +1,20 @@
 import examRepository from "../repositories/exam.repository.js";
 
 class ExamService {
-    async getAllExams() {
-        return await examRepository.findAll();
+    async getAllExams(
+        page = 1,
+        limit = 10,
+        courseId = null,
+        search = null
+    ) {
+        const offset = (page - 1) * limit;
+
+        return await examRepository.findAll(
+            limit,
+            offset,
+            courseId,
+            search
+        );
     }
 
     async getExamById(id) {

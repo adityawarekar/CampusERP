@@ -2,23 +2,34 @@ import pool from "../config/db.js";
 
 class CourseRepository {
 
-    async findAll() {
+    async findAll(limit, offset, search) {
 
-        const query = `
-            SELECT
-                id,
-                name,
-                code,
-                credits,
-                created_at
-            FROM courses
-            ORDER BY name;
-        `;
+    const query = `
+        SELECT
+            id,
+            name,
+            code,
+            credits,
+            created_at
+        FROM courses
+        WHERE
+            (
+                $3::text IS NULL
+                OR name ILIKE '%' || $3::text || '%'
+                OR code ILIKE '%' || $3::text || '%'
+            )
+        ORDER BY name
+        LIMIT $1
+        OFFSET $2
+    `;
 
-        const result = await pool.query(query);
+    const result = await pool.query(
+        query,
+        [limit, offset, search]
+    );
 
-        return result.rows;
-    }
+    return result.rows;
+}
 
     async findById(id) {
 

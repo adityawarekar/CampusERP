@@ -2,9 +2,21 @@ import departmentRepository from "../repositories/department.repository.js";
 import studentRepository from "../repositories/student.repository.js";
 
 class StudentService {
+    async getAllStudents(
+        page = 1,
+        limit = 10,
+        departmentId = null,
+        search = null
+    ) {
 
-    async getAllStudents() {
-        return await studentRepository.findAll();
+        const offset = (page - 1) * limit;
+
+        return await studentRepository.findAll(
+            limit,
+            offset,
+            departmentId,
+            search
+        );
     }
 
     async getStudentById(id) {
@@ -105,7 +117,7 @@ class StudentService {
     async deleteStudents(id) {
         const student = await studentRepository.findById(id);
 
-        if(!student) {
+        if (!student) {
             throw new Error("Student not found");
         }
 

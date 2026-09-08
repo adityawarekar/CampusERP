@@ -1,8 +1,6 @@
-import pool from "../config/db.js";
-
 const validate = (schema) => {
     return (req, res, next) => {
-        const { error } = schema.validate(
+        const { error, value } = schema.validate(
             req.body,
             {
                 abortEarly: false
@@ -17,6 +15,7 @@ const validate = (schema) => {
                 )
             });
         }
+        req.body = value;
         next();
     };
 };

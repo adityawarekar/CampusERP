@@ -6,10 +6,30 @@ class ResultController {
 
         try {
 
+            const page =
+                parseInt(req.query.page) || 1;
+
+            const limit =
+                parseInt(req.query.limit) || 10;
+
+            const studentId =
+                req.query.studentId
+                    ? parseInt(req.query.studentId)
+                    : null;
+
+            const examId =
+                req.query.examId
+                    ? parseInt(req.query.examId)
+                    : null;
+
             const results =
                 await resultService.getAllResults(
                     req.user.id,
-                    req.user.role
+                    req.user.role,
+                    page,
+                    limit,
+                    studentId,
+                    examId
                 );
 
             return res.status(200).json({

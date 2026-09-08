@@ -2,14 +2,33 @@ import studentService from "../services/student.service.js";
 
 class StudentController {
     async getAllStudents(req, res) {
-
         try {
 
+            const page =
+                parseInt(req.query.page) || 1;
+
+            const limit =
+                parseInt(req.query.limit) || 10;
+
+            const departmentId =
+                req.query.departmentId
+                    ? parseInt(req.query.departmentId)
+                    : null;
+
+            const search =
+                req.query.search || null;
+
             const students =
-                await studentService.getAllStudents();
+                await studentService.getAllStudents(
+                    page,
+                    limit,
+                    departmentId,
+                    search
+                );
 
             return res.status(200).json({
                 success: true,
+                message: "Students fetched successfully",
                 data: students
             });
 
@@ -21,7 +40,6 @@ class StudentController {
             });
 
         }
-
     }
 
     async getStudentById(req, res) {
@@ -160,16 +178,16 @@ class StudentController {
         try {
             const { id } = req.params;
 
-            const student = 
-               await studentService.deleteStudents(id);
+            const student =
+                await studentService.deleteStudents(id);
 
             return res.status(200).json({
                 success: true,
                 message: "Student deleted successfully",
                 data: student
-            });   
+            });
         } catch (error) {
-            if(error.message === "Student not found") {
+            if (error.message === "Student not found") {
                 return res.status(404).json({
                     success: false,
                     message: error.message

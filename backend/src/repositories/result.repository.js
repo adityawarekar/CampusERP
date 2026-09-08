@@ -2,46 +2,61 @@ import pool from "../config/db.js";
 
 class ResultRepository {
 
-    async findAll() {
+    async findAll(limit, offset, studentId, examId) {
 
         const query = `
-            SELECT
-                results.id,
+        SELECT
+            results.id,
 
-                students.id AS student_id,
-                students.roll_number,
-                students.first_name || ' ' || students.last_name AS student_name,
+            students.id AS student_id,
+            students.roll_number,
+            students.first_name || ' ' || students.last_name AS student_name,
 
-                exams.id AS exam_id,
-                exams.exam_name,
-                exams.exam_date,
-                exams.max_marks,
+            exams.id AS exam_id,
+            exams.exam_name,
+            exams.exam_date,
+            exams.max_marks,
 
-                courses.id AS course_id,
-                courses.name AS course_name,
-                courses.code AS course_code,
+            courses.id AS course_id,
+            courses.name AS course_name,
+            courses.code AS course_code,
 
-                results.marks_obtained
+            results.marks_obtained
 
-            FROM results
+        FROM results
 
-            INNER JOIN students
-                ON results.student_id = students.id
+        INNER JOIN students
+            ON results.student_id = students.id
 
-            INNER JOIN exams
-                ON results.exam_id = exams.id
+        INNER JOIN exams
+            ON results.exam_id = exams.id
 
-            INNER JOIN courses
-                ON exams.course_id = courses.id
+        INNER JOIN courses
+            ON exams.course_id = courses.id
 
-            ORDER BY results.id;
-        `;
+        WHERE
+            (
+                $3::integer IS NULL
+                OR results.student_id = $3::integer
+            )
+            AND
+            (
+                $4::integer IS NULL
+                OR results.exam_id = $4::integer
+            )
 
-        const result = await pool.query(query);
+        ORDER BY results.id
+        LIMIT $1
+        OFFSET $2
+    `;
+
+        const result = await pool.query(
+            query,
+            [limit, offset, studentId, examId]
+        );
 
         return result.rows;
     }
-
     async findAllByUserId(userId) {
 
         const query = `

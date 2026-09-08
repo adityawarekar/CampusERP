@@ -5,9 +5,24 @@ class ExamController {
     async getAllExams(req, res) {
 
         try {
+            const page = 
+               parseInt(req.query.page) || 1;
+            const limit = 
+               parseInt(req.query.limit) || 10;
+            const courseId = 
+                req.query.courseId
+                   ? parseInt(req.query.courseId)
+                   : null;
+            const search = 
+                req.query.search || null;            
 
             const exams =
-                await examService.getAllExams();
+                await examService.getAllExams(
+                    page,
+                    limit,
+                    courseId,
+                    search
+                );
 
             return res.status(200).json({
                 success: true,

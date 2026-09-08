@@ -3,11 +3,23 @@ import courseService from "../services/course.service.js";
 class CourseController {
 
     async getAllCourses(req, res) {
-
         try {
 
+            const page =
+                parseInt(req.query.page) || 1;
+
+            const limit =
+                parseInt(req.query.limit) || 10;
+
+            const search =
+                req.query.search || null;
+
             const courses =
-                await courseService.getAllCourses();
+                await courseService.getAllCourses(
+                    page,
+                    limit,
+                    search
+                );
 
             return res.status(200).json({
                 success: true,

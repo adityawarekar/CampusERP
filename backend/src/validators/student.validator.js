@@ -20,6 +20,7 @@ export const createStudentSchema = Joi.object({
       
     email: Joi.string()
         .trim()
+        .lowercase()
         .email()
         .max(150)
         .required(),
@@ -55,6 +56,7 @@ export const updateStudentSchema = Joi.object({
 
     email: Joi.string()
         .trim()
+        .lowercase()
         .email()
         .max(150)
         .required(),

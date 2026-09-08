@@ -2,10 +2,19 @@ import courseRepository from "../repositories/course.repository.js";
 
 class CourseService {
 
-    async getAllCourses() {
+    async getAllCourses(
+        page = 1,
+        limit = 10,
+        search = null
+    ) {
 
-        return await courseRepository.findAll();
+        const offset = (page - 1) * limit;
 
+        return await courseRepository.findAll(
+            limit,
+            offset,
+            search
+        );
     }
 
     async getCourseById(id) {
@@ -59,13 +68,13 @@ class CourseService {
     }
 
     async deleteCourse(id) {
-        const course = 
-           await courseRepository.findById(id);
-        
+        const course =
+            await courseRepository.findById(id);
+
         if (!course) {
             throw new Error("Course not found");
         }
-        
+
         return await courseRepository.delete(id);
     }
 
