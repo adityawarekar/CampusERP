@@ -6,17 +6,39 @@ class StudentService {
         page = 1,
         limit = 10,
         departmentId = null,
-        search = null
+        search = null,
+        sortBy = null,
+        order = null
     ) {
 
         const offset = (page - 1) * limit;
 
-        return await studentRepository.findAll(
-            limit,
-            offset,
-            departmentId,
-            search
-        );
+        const [students, total] = await Promise.all([
+            studentRepository.findAll(
+                limit,
+                offset,
+                departmentId,
+                search,
+                sortBy,
+                order
+            ),
+            studentRepository.countAll(
+                departmentId,
+                search
+            )
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+
+        return {
+            data: students,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages
+            }
+        };
     }
 
     async getStudentById(id) {

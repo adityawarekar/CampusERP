@@ -1,26 +1,93 @@
 import pool from "../config/db.js";
 
 class AttendanceRepository {
-    async findAll() {
+    async findAll(
+        limit,
+        offset,
+        studentId,
+        status,
+        sortBy,
+        order
+    ) {
+        const ALLOWED_SORT_COLUMNS = {
+            attendanceDate: "attendance.attendance_date",
+            status: "attendance.status",
+            id: "attendance.id"
+        };
+
+        const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "attendance.attendance_date";
+        const sortOrder = order && order.toString().toUpperCase() === "ASC" ? "ASC" : "DESC";
+
         const query = `
-            SELECT
-                 attendance.id,
-                 attendance.attendance_date,
-                 attendance.status,
-                 students.roll_number,
-                 students.first_name || ' ' || students.last_name AS student_name,
-                 departments.name AS department
+        SELECT
+            attendance.id,
+            attendance.attendance_date,
+            attendance.status,
+
+            students.id AS student_id,
+            students.roll_number,
+            students.first_name || ' ' || students.last_name AS student_name,
+
+            departments.name AS department
+
+        FROM attendance
+
+        INNER JOIN students
+            ON attendance.student_id = students.id
+
+        INNER JOIN departments
+            ON students.department_id = departments.id
+
+        WHERE
+            (
+                $3::integer IS NULL
+                OR attendance.student_id = $3::integer
+            )
+            AND
+            (
+                $4::text IS NULL
+                OR attendance.status = $4::text
+            )
+
+        ORDER BY ${sortColumn} ${sortOrder}
+        LIMIT $1
+        OFFSET $2
+    `;
+
+        const result = await pool.query(
+            query,
+            [limit, offset, studentId, status]
+        );
+
+        return result.rows;
+    }
+
+    async countAll(studentId, status) {
+        const query = `
+            SELECT COUNT(*)
             FROM attendance
             INNER JOIN students
                 ON attendance.student_id = students.id
             INNER JOIN departments
-                ON students.department_id = departments.id    
-            ORDER BY attendance.attendance_date DESC;       
-          `;
+                ON students.department_id = departments.id
+            WHERE
+                (
+                    $1::integer IS NULL
+                    OR attendance.student_id = $1::integer
+                )
+                AND
+                (
+                    $2::text IS NULL
+                    OR attendance.status = $2::text
+                )
+        `;
 
-        const result = await pool.query(query);
+        const result = await pool.query(
+            query,
+            [studentId, status]
+        );
 
-        return result.rows;
+        return parseInt(result.rows[0].count, 10);
     }
 
     async findById(id) {

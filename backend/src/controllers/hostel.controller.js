@@ -6,13 +6,32 @@ class HostelController {
 
         try {
 
-            const hostels =
-                await hostelService.getAllHostels();
+            const page =
+                parseInt(req.query.page) || 1;
+
+            const limit =
+                parseInt(req.query.limit) || 10;
+
+            const search =
+                req.query.search || null;
+
+            const sortBy = req.query.sortBy || null;
+            const order = req.query.order || null;
+
+            const result =
+                await hostelService.getAllHostels(
+                    page,
+                    limit,
+                    search,
+                    sortBy,
+                    order
+                );
 
             return res.status(200).json({
                 success: true,
                 message: "Hostels fetched successfully",
-                data: hostels
+                data: result.data,
+                pagination: result.pagination
             });
 
         } catch (error) {
@@ -111,21 +130,21 @@ class HostelController {
                 totalRooms
             } = req.body;
 
-            const hostel = 
-               await hostelService.updateHostel(
-                  id,
-                  name,
-                  location,
-                  totalRooms
-               );
+            const hostel =
+                await hostelService.updateHostel(
+                    id,
+                    name,
+                    location,
+                    totalRooms
+                );
             return res.status(200).json({
                 success: true,
                 message: "Hostel updated succesfully",
                 data: hostel
-            });   
+            });
         } catch (error) {
             if (
-                error.message === 
+                error.message ===
                 "Hostel not found"
             ) {
                 return res.status(404).json({
@@ -156,14 +175,14 @@ class HostelController {
         try {
             const { id } = req.params;
 
-            const hostel = 
-               await hostelService.deleteHostel(id);
+            const hostel =
+                await hostelService.deleteHostel(id);
 
             return res.status(200).json({
                 success: true,
                 message: "Hostel deleted successfully",
                 data: hostel
-            });    
+            });
         } catch (error) {
             if (
                 error.message ===

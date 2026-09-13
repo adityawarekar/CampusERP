@@ -6,13 +6,38 @@ class AttendanceController {
 
         try {
 
-            const attendance =
-                await attendanceService.getAllAttendance();
+            const page =
+                parseInt(req.query.page) || 1;
+
+            const limit =
+                parseInt(req.query.limit) || 10;
+
+            const studentId =
+                req.query.studentId
+                    ? parseInt(req.query.studentId)
+                    : null;
+
+            const status =
+                req.query.status || null;
+
+            const sortBy = req.query.sortBy || null;
+            const order = req.query.order || null;
+
+            const result =
+                await attendanceService.getAllAttendance(
+                    page,
+                    limit,
+                    studentId,
+                    status,
+                    sortBy,
+                    order
+                );
 
             return res.status(200).json({
                 success: true,
                 message: "Attendance fetched successfully",
-                data: attendance
+                data: result.data,
+                pagination: result.pagination
             });
 
         } catch (error) {
@@ -23,7 +48,6 @@ class AttendanceController {
             });
 
         }
-
     }
 
     async getAttendanceById(req, res) {

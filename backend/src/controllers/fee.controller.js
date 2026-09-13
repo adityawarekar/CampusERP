@@ -2,22 +2,52 @@ import feeService from "../services/fee.service.js";
 
 class FeeController {
     async getAllFees(req, res) {
+
         try {
-            const fees =
+
+            const page =
+                parseInt(req.query.page) || 1;
+
+            const limit =
+                parseInt(req.query.limit) || 10;
+
+            const studentId =
+                req.query.studentId
+                    ? parseInt(req.query.studentId)
+                    : null;
+
+            const status =
+                req.query.status || null;
+
+            const sortBy = req.query.sortBy || null;
+            const order = req.query.order || null;
+
+            const result =
                 await feeService.getAllFees(
                     req.user.id,
-                    req.user.role
+                    req.user.role,
+                    page,
+                    limit,
+                    studentId,
+                    status,
+                    sortBy,
+                    order
                 );
+
             return res.status(200).json({
                 success: true,
                 message: "Fees fetched successfully",
-                data: fees
+                data: result.data,
+                pagination: result.pagination
             });
+
         } catch (error) {
+
             return res.status(500).json({
                 success: false,
                 message: error.message
             });
+
         }
     }
 

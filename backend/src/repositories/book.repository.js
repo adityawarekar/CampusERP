@@ -2,25 +2,69 @@ import pool from "../config/db.js";
 
 class BookRepository {
 
-    async findAll() {
+    async findAll(
+        limit,
+        offset,
+        search,
+        sortBy,
+        order
+    ) {
+        const ALLOWED_SORT_COLUMNS = {
+            id: "books.id",
+            title: "books.title",
+            author: "books.author",
+            totalCopies: "books.total_copies",
+            availableCopies: "books.available_copies",
+            createdAt: "books.created_at"
+        };
+
+        const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "books.id";
+        const sortOrder = order && order.toString().toUpperCase() === "DESC" ? "DESC" : "ASC";
 
         const query = `
-            SELECT
-                id,
-                title,
-                author,
-                isbn,
-                total_copies,
-                available_copies,
-                created_at,
-                updated_at
-            FROM books
-            ORDER BY id;
-        `;
+        SELECT
+            id,
+            title,
+            author,
+            isbn,
+            total_copies,
+            available_copies,
+            created_at,
+            updated_at
+        FROM books
+        WHERE
+            (
+                $3::text IS NULL
+                OR title ILIKE '%' || $3::text || '%'
+                OR author ILIKE '%' || $3::text || '%'
+            )
+        ORDER BY ${sortColumn} ${sortOrder}
+        LIMIT $1
+        OFFSET $2
+    `;
 
-        const result = await pool.query(query);
+        const result = await pool.query(
+            query,
+            [limit, offset, search]
+        );
 
         return result.rows;
+    }
+
+    async countAll(search) {
+        const query = `
+            SELECT COUNT(*)
+            FROM books
+            WHERE
+                (
+                    $1::text IS NULL
+                    OR title ILIKE '%' || $1::text || '%'
+                    OR author ILIKE '%' || $1::text || '%'
+                )
+        `;
+
+        const result = await pool.query(query, [search]);
+        return parseInt(result.rows[0].count, 10);
     }
 
     async create(
@@ -134,7 +178,7 @@ class BookRepository {
 
     async delete(id) {
 
-    const query = `
+        const query = `
         DELETE FROM books
         WHERE id = $1
         RETURNING
@@ -146,10 +190,10 @@ class BookRepository {
             available_copies;
     `;
 
-    const result = await pool.query(query, [id]);
+        const result = await pool.query(query, [id]);
 
-    return result.rows[0];
-}
+        return result.rows[0];
+    }
 
 }
 

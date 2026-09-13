@@ -55,27 +55,61 @@ class HostleAllocationController {
     }
 
     async getAllAllocations(req, res) {
+
         try {
-            const allocations =
+
+            const page =
+                parseInt(req.query.page) || 1;
+
+            const limit =
+                parseInt(req.query.limit) || 10;
+
+            const studentId =
+                req.query.studentId
+                    ? parseInt(req.query.studentId)
+                    : null;
+
+            const roomId =
+                req.query.roomId
+                    ? parseInt(req.query.roomId)
+                    : null;
+
+            const status =
+                req.query.status || null;
+
+            const search =
+                req.query.search || null;
+
+            const result =
                 await hostelAllocationService
-                    .getAllAllocations();
+                    .getAllAllocations(
+                        page,
+                        limit,
+                        studentId,
+                        roomId,
+                        status,
+                        search
+                    );
 
             return res.status(200).json({
                 success: true,
                 message:
                     "Hostel allocations fetched successfully",
-                data: allocations
+                data: result.data,
+                pagination: result.pagination
             });
+
         } catch (error) {
-            return res.status(500).jso({
+
+            return res.status(500).json({
                 success: false,
                 message: error.message
             });
+
         }
     }
 
     async getAllAllocationById(req, res) {
-        console.log("🔥 GET ALLOCATION BY ID HIT");
         try {
             const { id } = req.params;
 
@@ -92,7 +126,7 @@ class HostleAllocationController {
                 error.message ===
                 "Hostel allocation not found"
             ) {
-                return res.status(500).json({
+                return res.status(404).json({
                     success: false,
                     message: error.message
                 });
@@ -107,7 +141,7 @@ class HostleAllocationController {
             const allocation =
                 await hostelAllocationService.vacatedAllocation(id);
 
-            return res.status(200).josn({
+            return res.status(200).json({
                 success: true,
                 message:
                     "Student vacated successfully",
@@ -182,16 +216,16 @@ class HostleAllocationController {
 
     async getActiveAllocations(req, res) {
         try {
-            const allocations = 
-               await hostelAllocationService
-                  .getActiveAllocation();
-               
+            const allocations =
+                await hostelAllocationService
+                    .getActiveAllocation();
+
             return res.status(200).json({
                 success: true,
                 message:
-                "Active hostel allocations fetched successully",
+                    "Active hostel allocations fetched successully",
                 data: allocations
-            });      
+            });
         } catch (error) {
             return res.status(500).json({
                 success: false,

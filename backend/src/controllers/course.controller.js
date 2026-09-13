@@ -14,17 +14,23 @@ class CourseController {
             const search =
                 req.query.search || null;
 
-            const courses =
+            const sortBy = req.query.sortBy || null;
+            const order = req.query.order || null;
+
+            const result =
                 await courseService.getAllCourses(
                     page,
                     limit,
-                    search
+                    search,
+                    sortBy,
+                    order
                 );
 
             return res.status(200).json({
                 success: true,
                 message: "Courses fetched successfully",
-                data: courses
+                data: result.data,
+                pagination: result.pagination
             });
 
         } catch (error) {

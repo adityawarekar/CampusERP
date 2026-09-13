@@ -2,23 +2,61 @@ import bookIssueService from "../services/bookIssue.service.js";
 
 class BookIssueController {
     async getAllBookIssues(req, res) {
+
         try {
-            const issues =
-                await bookIssueService.getAllBookIssues();
+
+            const page =
+                parseInt(req.query.page) || 1;
+
+            const limit =
+                parseInt(req.query.limit) || 10;
+
+            const studentId =
+                req.query.studentId
+                    ? parseInt(req.query.studentId)
+                    : null;
+
+            const bookId =
+                req.query.bookId
+                    ? parseInt(req.query.bookId)
+                    : null;
+
+            const status =
+                req.query.status || null;
+
+            const search =
+                req.query.search || null;
+
+            const sortBy = req.query.sortBy || null;
+            const order = req.query.order || null;
+
+            const result =
+                await bookIssueService.getAllBookIssues(
+                    page,
+                    limit,
+                    studentId,
+                    bookId,
+                    status,
+                    search,
+                    sortBy,
+                    order
+                );
 
             return res.status(200).json({
                 success: true,
                 message: "Book issues fetched successfully",
-                data: issues
+                data: result.data,
+                pagination: result.pagination
             });
+
         } catch (error) {
+
             return res.status(500).json({
                 success: false,
                 message: error.message
             });
         }
     }
-
     async createBookIssue(req, res) {
 
         try {
@@ -142,11 +180,6 @@ class BookIssueController {
     }
 
     async getBookIssuesByStudentId(req, res) {
-
-        console.log(
-            "🔥 STUDENT ROUTE HIT:",
-            req.params
-        );
 
         try {
 

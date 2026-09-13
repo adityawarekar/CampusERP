@@ -1,27 +1,97 @@
 import pool from "../config/db.js";
 
 class RoomRepository {
-    async findAll() {
-        const query = `
-            SELECT
-                rooms.id,
-                rooms.hostel_id,
-                hostels.name AS hostel_name,
-                rooms.room_number,
-                rooms.capacity,
-                rooms.occupied_beds,
-                rooms.created_at,
-                rooms.updated_at
-            FROM rooms
-            
-            INNER JOIN hostels
-               ON rooms.hostel_id = hostels.id
+    async findAll(
+        limit,
+        offset,
+        hostelId,
+        search,
+        sortBy,
+        order
+    ) {
+        const ALLOWED_SORT_COLUMNS = {
+            id: "rooms.id",
+            roomNumber: "rooms.room_number",
+            capacity: "rooms.capacity",
+            occupiedBeds: "rooms.occupied_beds"
+        };
 
-            ORDER BY rooms.id;   
-            
-        `;
-        const result = await pool.query(query);
+        const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "rooms.id";
+        const sortOrder = order && order.toString().toUpperCase() === "DESC" ? "DESC" : "ASC";
+
+        const query = `
+        SELECT
+            rooms.id,
+            rooms.hostel_id,
+            hostels.name AS hostel_name,
+            rooms.room_number,
+            rooms.capacity,
+            rooms.occupied_beds,
+            rooms.created_at,
+            rooms.updated_at
+        FROM rooms
+
+        INNER JOIN hostels
+            ON rooms.hostel_id = hostels.id
+
+        WHERE
+            (
+                $3::integer IS NULL
+                OR rooms.hostel_id = $3::integer
+            )
+
+            AND
+
+            (
+                $4::text IS NULL
+                OR rooms.room_number ILIKE '%' || $4::text || '%'
+                OR hostels.name ILIKE '%' || $4::text || '%'
+            )
+
+        ORDER BY ${sortColumn} ${sortOrder}
+
+        LIMIT $1
+        OFFSET $2;
+    `;
+
+        const result = await pool.query(
+            query,
+            [
+                limit,
+                offset,
+                hostelId,
+                search
+            ]
+        );
+
         return result.rows;
+    }
+
+    async countAll(hostelId, search) {
+        const query = `
+            SELECT COUNT(*)
+            FROM rooms
+            INNER JOIN hostels
+                ON rooms.hostel_id = hostels.id
+            WHERE
+                (
+                    $1::integer IS NULL
+                    OR rooms.hostel_id = $1::integer
+                )
+                AND
+                (
+                    $2::text IS NULL
+                    OR rooms.room_number ILIKE '%' || $2::text || '%'
+                    OR hostels.name ILIKE '%' || $2::text || '%'
+                )
+        `;
+
+        const result = await pool.query(
+            query,
+            [hostelId, search]
+        );
+
+        return parseInt(result.rows[0].count, 10);
     }
 
     async findById(id) {

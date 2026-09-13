@@ -2,35 +2,121 @@ import pool from "../config/db.js";
 
 class BookIssueRepository {
 
-    async findAll() {
+    async findAll(
+        limit,
+        offset,
+        studentId,
+        bookId,
+        status,
+        search,
+        sortBy,
+        order
+    ) {
+        const ALLOWED_SORT_COLUMNS = {
+            id: "book_issues.id",
+            issueDate: "book_issues.issue_date",
+            dueDate: "book_issues.due_date",
+            returnDate: "book_issues.return_date",
+            status: "book_issues.status"
+        };
+
+        const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "book_issues.id";
+        const sortOrder = order && order.toString().toUpperCase() === "DESC" ? "DESC" : "ASC";
 
         const query = `
-            SELECT
-                book_issues.id,
-                book_issues.book_id,
-                books.title AS book_title,
-                book_issues.student_id,
-                students.roll_number,
-                students.first_name || ' ' || students.last_name
-                    AS student_name,
-                book_issues.issue_date,
-                book_issues.due_date,
-                book_issues.return_date,
-                book_issues.status
-            FROM book_issues
+        SELECT
+            book_issues.id,
+            book_issues.book_id,
+            books.title AS book_title,
+            book_issues.student_id,
+            students.roll_number,
+            students.first_name || ' ' || students.last_name
+                AS student_name,
+            book_issues.issue_date,
+            book_issues.due_date,
+            book_issues.return_date,
+            book_issues.status
+        FROM book_issues
 
-            INNER JOIN books
-                ON book_issues.book_id = books.id
+        INNER JOIN books
+            ON book_issues.book_id = books.id
 
-            INNER JOIN students
-                ON book_issues.student_id = students.id
+        INNER JOIN students
+            ON book_issues.student_id = students.id
 
-            ORDER BY book_issues.id;
-        `;
+        WHERE
+            ($3::integer IS NULL
+                OR book_issues.student_id = $3::integer)
 
-        const result = await pool.query(query);
+            AND
+
+            ($4::integer IS NULL
+                OR book_issues.book_id = $4::integer)
+
+            AND
+
+            ($5::text IS NULL
+                OR book_issues.status = $5::text)
+
+            AND
+
+            (
+                $6::text IS NULL
+                OR books.title ILIKE '%' || $6::text || '%'
+                OR students.first_name || ' ' || students.last_name
+                    ILIKE '%' || $6::text || '%'
+            )
+
+        ORDER BY ${sortColumn} ${sortOrder}
+
+        LIMIT $1
+        OFFSET $2;
+    `;
+
+        const result = await pool.query(
+            query,
+            [
+                limit,
+                offset,
+                studentId,
+                bookId,
+                status,
+                search
+            ]
+        );
 
         return result.rows;
+    }
+
+    async countAll(studentId, bookId, status, search) {
+        const query = `
+            SELECT COUNT(*)
+            FROM book_issues
+            INNER JOIN books
+                ON book_issues.book_id = books.id
+            INNER JOIN students
+                ON book_issues.student_id = students.id
+            WHERE
+                ($1::integer IS NULL OR book_issues.student_id = $1::integer)
+                AND
+                ($2::integer IS NULL OR book_issues.book_id = $2::integer)
+                AND
+                ($3::text IS NULL OR book_issues.status = $3::text)
+                AND
+                (
+                    $4::text IS NULL
+                    OR books.title ILIKE '%' || $4::text || '%'
+                    OR students.first_name || ' ' || students.last_name
+                        ILIKE '%' || $4::text || '%'
+                )
+        `;
+
+        const result = await pool.query(
+            query,
+            [studentId, bookId, status, search]
+        );
+
+        return parseInt(result.rows[0].count, 10);
     }
 
     async createIssue(
@@ -184,7 +270,7 @@ class BookIssueRepository {
                 RETURNING
                     id,
                     book_id,
-                    student_id
+                    student_id,
                     issue_date,
                     due_date,
                     return_date,

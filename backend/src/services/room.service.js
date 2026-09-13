@@ -2,10 +2,43 @@ import roomRepository from "../repositories/room.repository.js";
 
 class RoomService {
 
-    async getAllRooms() {
+    async getAllRooms(
+        page = 1,
+        limit = 10,
+        hostelId = null,
+        search = null,
+        sortBy = null,
+        order = null
+    ) {
 
-        return await roomRepository.findAll();
+        const offset = (page - 1) * limit;
 
+        const [rooms, total] = await Promise.all([
+            roomRepository.findAll(
+                limit,
+                offset,
+                hostelId,
+                search,
+                sortBy,
+                order
+            ),
+            roomRepository.countAll(
+                hostelId,
+                search
+            )
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+
+        return {
+            data: rooms,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages
+            }
+        };
     }
 
     async getRoomById(id) {

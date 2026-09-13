@@ -18,18 +18,24 @@ class StudentController {
             const search =
                 req.query.search || null;
 
-            const students =
+            const sortBy = req.query.sortBy || null;
+            const order = req.query.order || null;
+
+            const result =
                 await studentService.getAllStudents(
                     page,
                     limit,
                     departmentId,
-                    search
+                    search,
+                    sortBy,
+                    order
                 );
 
             return res.status(200).json({
                 success: true,
                 message: "Students fetched successfully",
-                data: students
+                data: result.data,
+                pagination: result.pagination
             });
 
         } catch (error) {

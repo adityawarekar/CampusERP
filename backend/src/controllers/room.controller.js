@@ -2,20 +2,50 @@ import roomService from "../services/room.service.js";
 
 class RoomController {
     async getAllRooms(req, res) {
+
         try {
-            const rooms =
-                await roomService.getAllRooms();
+
+            const page =
+                parseInt(req.query.page) || 1;
+
+            const limit =
+                parseInt(req.query.limit) || 10;
+
+            const hostelId =
+                req.query.hostelId
+                    ? parseInt(req.query.hostelId)
+                    : null;
+
+            const search =
+                req.query.search || null;
+
+            const sortBy = req.query.sortBy || null;
+            const order = req.query.order || null;
+
+            const result =
+                await roomService.getAllRooms(
+                    page,
+                    limit,
+                    hostelId,
+                    search,
+                    sortBy,
+                    order
+                );
 
             return res.status(200).json({
                 success: true,
                 message: "Rooms fetched successfully",
-                data: rooms
+                data: result.data,
+                pagination: result.pagination
             });
+
         } catch (error) {
+
             return res.status(500).json({
                 success: false,
                 message: error.message
             });
+
         }
     }
 
@@ -66,7 +96,29 @@ class RoomController {
                 data: room
             });
         } catch (error) {
-            next(error);
+            if (
+                error.message === "Hostel not found" ||
+                error.message === "Room number is required" ||
+                error.message === "Room capacity must be graeter than zero" ||
+                error.message === "Room already exists in this hostel"
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+
+            if (error.message === "Hostel not found") {
+                return res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
         }
     }
 
@@ -146,14 +198,14 @@ class RoomController {
         try {
             const { id } = req.params;
 
-            const room = 
-               await roomService.deleteRoom(id);
+            const room =
+                await roomService.deleteRoom(id);
 
             return res.status(200).json({
                 success: true,
                 message: "Room deleted successfully",
                 data: room
-            }) ;  
+            });
         } catch (error) {
             if (
                 error.message ===
@@ -170,22 +222,18 @@ class RoomController {
                 message: error.message
             });
         }
-        return res.status(500).json({
-            success: false,
-            message: error.message
-        });
     }
 
     async getRoomAvailability(req, res) {
         try {
-            const rooms = 
-               await roomService.getRoomAvailability();
-            
+            const rooms =
+                await roomService.getRoomAvailability();
+
             return res.status(200).json({
                 success: true,
                 message: "Room availability fetched successfully",
                 data: rooms
-            });   
+            });
         } catch (error) {
             return res.status(500).json({
                 success: false,

@@ -1,17 +1,64 @@
 import feeRepository from "../repositories/fee.repository.js";
 
 class FeeService {
-    async getAllFees(userId, role) {
+    async getAllFees(
+    userId,
+    role,
+    page = 1,
+    limit = 10,
+    studentId = null,
+    status = null,
+    sortBy = null,
+    order = null
+) {
 
-    if (
-        role === "ADMIN"
-    ) {
-        return await feeRepository.findAll();
+    const offset = (page - 1) * limit;
+
+    if (role === "ADMIN") {
+        const [fees, total] = await Promise.all([
+            feeRepository.findAll(
+                limit,
+                offset,
+                studentId,
+                status,
+                sortBy,
+                order
+            ),
+            feeRepository.countAll(
+                studentId,
+                status
+            )
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+
+        return {
+            data: fees,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages
+            }
+        };
     }
 
-    return await feeRepository.findAllByUserId(
-        userId
-    );
+    const [fees, total] = await Promise.all([
+        feeRepository.findAllByUserId(userId, sortBy, order),
+        feeRepository.countAllByUserId(userId)
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+        data: fees,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages
+        }
+    };
 }
 
     async getFeeById(id) {

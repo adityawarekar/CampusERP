@@ -5,16 +5,35 @@ class CourseService {
     async getAllCourses(
         page = 1,
         limit = 10,
-        search = null
+        search = null,
+        sortBy = null,
+        order = null
     ) {
 
         const offset = (page - 1) * limit;
 
-        return await courseRepository.findAll(
-            limit,
-            offset,
-            search
-        );
+        const [courses, total] = await Promise.all([
+            courseRepository.findAll(
+                limit,
+                offset,
+                search,
+                sortBy,
+                order
+            ),
+            courseRepository.countAll(search)
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+
+        return {
+            data: courses,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages
+            }
+        };
     }
 
     async getCourseById(id) {

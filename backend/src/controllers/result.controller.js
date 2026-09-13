@@ -22,20 +22,26 @@ class ResultController {
                     ? parseInt(req.query.examId)
                     : null;
 
-            const results =
+            const sortBy = req.query.sortBy || null;
+            const order = req.query.order || null;
+
+            const result =
                 await resultService.getAllResults(
                     req.user.id,
                     req.user.role,
                     page,
                     limit,
                     studentId,
-                    examId
+                    examId,
+                    sortBy,
+                    order
                 );
 
             return res.status(200).json({
                 success: true,
                 message: "Results fetched successfully",
-                data: results
+                data: result.data,
+                pagination: result.pagination
             });
 
         } catch (error) {

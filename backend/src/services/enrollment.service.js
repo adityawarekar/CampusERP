@@ -11,19 +11,68 @@ class EnrollmentService {
 
     }
 
-    async getAllEnrollments(userId, role) {
+    async getAllEnrollments(
+    userId,
+    role,
+    page = 1,
+    limit = 10,
+    studentId = null,
+    courseId = null,
+    sortBy = null,
+    order = null
+) {
 
-        if (
-            role === "ADMIN" ||
-            role === "FACULTY"
-        ) {
-            return await enrollmentRepository.findAll();
-        }
+    const offset = (page - 1) * limit;
 
-        return await enrollmentRepository.findAllByUserId(
-            userId
-        );
+    if (
+        role === "ADMIN" ||
+        role === "FACULTY"
+    ) {
+        const [enrollments, total] = await Promise.all([
+            enrollmentRepository.findAll(
+                limit,
+                offset,
+                studentId,
+                courseId,
+                sortBy,
+                order
+            ),
+            enrollmentRepository.countAll(
+                studentId,
+                courseId
+            )
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+
+        return {
+            data: enrollments,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages
+            }
+        };
     }
+
+    const [enrollments, total] = await Promise.all([
+        enrollmentRepository.findAllByUserId(userId, limit, offset, sortBy, order),
+        enrollmentRepository.countAllByUserId(userId)
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+        data: enrollments,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages
+        }
+    };
+}
 
     async getEnrollmentById(id) {
 

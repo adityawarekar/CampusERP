@@ -8,7 +8,9 @@ class ResultService {
         page = 1,
         limit = 10,
         studentId = null,
-        examId = null
+        examId = null,
+        sortBy = null,
+        order = null
     ) {
 
         const offset = (page - 1) * limit;
@@ -17,18 +19,50 @@ class ResultService {
             role === "ADMIN" ||
             role === "FACULTY"
         ) {
+            const [results, total] = await Promise.all([
+                resultRepository.findAll(
+                    limit,
+                    offset,
+                    studentId,
+                    examId,
+                    sortBy,
+                    order
+                ),
+                resultRepository.countAll(
+                    studentId,
+                    examId
+                )
+            ]);
 
-            return await resultRepository.findAll(
-                limit,
-                offset,
-                studentId,
-                examId
-            );
+            const totalPages = Math.ceil(total / limit);
+
+            return {
+                data: results,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages
+                }
+            };
         }
 
-        return await resultRepository.findAllByUserId(
-            userId
-        );
+        const [results, total] = await Promise.all([
+            resultRepository.findAllByUserId(userId, limit, offset, sortBy, order),
+            resultRepository.countAllByUserId(userId)
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+
+        return {
+            data: results,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages
+            }
+        };
     }
 
     async getResultById(id) {

@@ -2,7 +2,15 @@ import pool from "../config/db.js";
 
 class ResultRepository {
 
-    async findAll(limit, offset, studentId, examId) {
+    async findAll(limit, offset, studentId, examId, sortBy, order) {
+        const ALLOWED_SORT_COLUMNS = {
+            id: "results.id",
+            marksObtained: "results.marks_obtained",
+            createdAt: "results.created_at"
+        };
+
+        const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "results.id";
+        const sortOrder = order && order.toString().toUpperCase() === "DESC" ? "DESC" : "ASC";
 
         const query = `
         SELECT
@@ -45,7 +53,7 @@ class ResultRepository {
                 OR results.exam_id = $4::integer
             )
 
-        ORDER BY results.id
+        ORDER BY ${sortColumn} ${sortOrder}
         LIMIT $1
         OFFSET $2
     `;
@@ -57,7 +65,51 @@ class ResultRepository {
 
         return result.rows;
     }
-    async findAllByUserId(userId) {
+
+    async countAll(studentId, examId) {
+        const query = `
+            SELECT COUNT(*)
+            FROM results
+            INNER JOIN students ON results.student_id = students.id
+            INNER JOIN exams ON results.exam_id = exams.id
+            INNER JOIN courses ON exams.course_id = courses.id
+            WHERE
+                ($1::integer IS NULL OR results.student_id = $1::integer)
+                AND
+                ($2::integer IS NULL OR results.exam_id = $2::integer)
+        `;
+
+        const result = await pool.query(query, [studentId, examId]);
+        return parseInt(result.rows[0].count, 10);
+    }
+
+    async countAllByUserId(userId) {
+        const query = `
+            SELECT COUNT(*)
+            FROM results
+            INNER JOIN students ON results.student_id = students.id
+            WHERE students.user_id = $1
+        `;
+
+        const result = await pool.query(query, [userId]);
+        return parseInt(result.rows[0].count, 10);
+    }
+
+    async findAllByUserId(
+        userId,
+        limit,
+        offset,
+        sortBy,
+        order
+    ) {
+        const ALLOWED_SORT_COLUMNS = {
+            id: "results.id",
+            marksObtained: "results.marks_obtained",
+            createdAt: "results.created_at"
+        };
+
+        const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "results.id";
+        const sortOrder = order && order.toString().toUpperCase() === "DESC" ? "DESC" : "ASC";
 
         const query = `
         SELECT
@@ -91,12 +143,12 @@ class ResultRepository {
 
         WHERE students.user_id = $1
 
-        ORDER BY results.id;
+        ORDER BY ${sortColumn} ${sortOrder};
     `;
 
         const result = await pool.query(
             query,
-            [userId]
+            [userId, limit, offset]
         );
 
         return result.rows;

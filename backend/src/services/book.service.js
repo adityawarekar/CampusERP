@@ -1,9 +1,39 @@
 import bookRepository from "../repositories/book.repository.js";
 
 class BookService {
-    async getAllBooks() {
-        return await bookRepository.findAll();
-    }
+    async getAllBooks(
+    page = 1,
+    limit = 10,
+    search = null,
+    sortBy = null,
+    order = null
+) {
+
+    const offset = (page - 1) * limit;
+
+    const [books, total] = await Promise.all([
+        bookRepository.findAll(
+            limit,
+            offset,
+            search,
+            sortBy,
+            order
+        ),
+        bookRepository.countAll(search)
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+        data: books,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages
+        }
+    };
+}
 
     async createBook(
         title,

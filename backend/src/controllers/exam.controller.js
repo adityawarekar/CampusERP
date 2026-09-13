@@ -16,18 +16,24 @@ class ExamController {
             const search = 
                 req.query.search || null;            
 
-            const exams =
+            const sortBy = req.query.sortBy || null;
+            const order = req.query.order || null;
+
+            const result =
                 await examService.getAllExams(
                     page,
                     limit,
                     courseId,
-                    search
+                    search,
+                    sortBy,
+                    order
                 );
 
             return res.status(200).json({
                 success: true,
                 message: "Exams fetched successfully",
-                data: exams
+                data: result.data,
+                pagination: result.pagination
             });
 
         } catch (error) {

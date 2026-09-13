@@ -2,9 +2,18 @@ import pool from "../config/db.js";
 
 class CourseRepository {
 
-    async findAll(limit, offset, search) {
+    async findAll(limit, offset, search, sortBy, order) {
+        const ALLOWED_SORT_COLUMNS = {
+            name: "courses.name",
+            code: "courses.code",
+            credits: "courses.credits",
+            createdAt: "courses.created_at"
+        };
 
-    const query = `
+        const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "courses.name";
+        const sortOrder = order && order.toString().toUpperCase() === "DESC" ? "DESC" : "ASC";
+
+        const query = `
         SELECT
             id,
             name,
@@ -18,7 +27,7 @@ class CourseRepository {
                 OR name ILIKE '%' || $3::text || '%'
                 OR code ILIKE '%' || $3::text || '%'
             )
-        ORDER BY name
+        ORDER BY ${sortColumn} ${sortOrder}
         LIMIT $1
         OFFSET $2
     `;
@@ -30,6 +39,22 @@ class CourseRepository {
 
     return result.rows;
 }
+
+    async countAll(search) {
+        const query = `
+            SELECT COUNT(*)
+            FROM courses
+            WHERE
+                (
+                    $1::text IS NULL
+                    OR name ILIKE '%' || $1::text || '%'
+                    OR code ILIKE '%' || $1::text || '%'
+                )
+        `;
+
+        const result = await pool.query(query, [search]);
+        return parseInt(result.rows[0].count, 10);
+    }
 
     async findById(id) {
 

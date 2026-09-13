@@ -2,31 +2,118 @@ import pool from "../config/db.js";
 
 class FeeRepository {
 
-    async findAll() {
+    async findAll(
+        limit,
+        offset,
+        studentId,
+        status,
+        sortBy,
+        order
+    ) {
+        const ALLOWED_SORT_COLUMNS = {
+            id: "fee_records.id",
+            totalAmount: "fee_records.total_amount",
+            amountPaid: "fee_records.amount_paid",
+            dueDate: "fee_records.due_date",
+            status: "fee_records.status"
+        };
+
+        const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "fee_records.id";
+        const sortOrder = order && order.toString().toUpperCase() === "DESC" ? "DESC" : "ASC";
 
         const query = `
-            SELECT
-                fee_records.id,
-                students.id AS student_id,
-                students.roll_number,
-                students.first_name || ' ' || students.last_name AS student_name,
-                fee_records.total_amount,
-                fee_records.amount_paid,
-                fee_records.total_amount - fee_records.amount_paid AS remaining_amount,
-                fee_records.due_date,
-                fee_records.status
-            FROM fee_records
-            INNER JOIN students
-                ON fee_records.student_id = students.id
-            ORDER BY fee_records.id;
-        `;
+        SELECT
+            fee_records.id,
 
-        const result = await pool.query(query);
+            students.id AS student_id,
+            students.roll_number,
+            students.first_name || ' ' || students.last_name AS student_name,
+
+            fee_records.total_amount,
+            fee_records.amount_paid,
+            fee_records.total_amount - fee_records.amount_paid AS remaining_amount,
+            fee_records.due_date,
+            fee_records.status
+
+        FROM fee_records
+
+        INNER JOIN students
+            ON fee_records.student_id = students.id
+
+        WHERE
+            (
+                $3::integer IS NULL
+                OR fee_records.student_id = $3::integer
+            )
+            AND
+            (
+                $4::text IS NULL
+                OR fee_records.status = $4::text
+            )
+
+        ORDER BY ${sortColumn} ${sortOrder}
+        LIMIT $1
+        OFFSET $2
+    `;
+
+        const result = await pool.query(
+            query,
+            [limit, offset, studentId, status]
+        );
 
         return result.rows;
     }
 
-    async findAllByUserId(userId) {
+    async countAll(studentId, status) {
+        const query = `
+            SELECT COUNT(*)
+            FROM fee_records
+            INNER JOIN students
+                ON fee_records.student_id = students.id
+            WHERE
+                (
+                    $1::integer IS NULL
+                    OR fee_records.student_id = $1::integer
+                )
+                AND
+                (
+                    $2::text IS NULL
+                    OR fee_records.status = $2::text
+                )
+        `;
+
+        const result = await pool.query(
+            query,
+            [studentId, status]
+        );
+
+        return parseInt(result.rows[0].count, 10);
+    }
+
+    async countAllByUserId(userId) {
+        const query = `
+            SELECT COUNT(*)
+            FROM fee_records
+            INNER JOIN students
+                ON fee_records.student_id = students.id
+            WHERE students.user_id = $1
+        `;
+
+        const result = await pool.query(query, [userId]);
+        return parseInt(result.rows[0].count, 10);
+    }
+
+    async findAllByUserId(userId, sortBy, order) {
+        const ALLOWED_SORT_COLUMNS = {
+            id: "fee_records.id",
+            totalAmount: "fee_records.total_amount",
+            amountPaid: "fee_records.amount_paid",
+            dueDate: "fee_records.due_date",
+            status: "fee_records.status"
+        };
+
+        const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "fee_records.id";
+        const sortOrder = order && order.toString().toUpperCase() === "DESC" ? "DESC" : "ASC";
 
         const query = `
         SELECT
@@ -43,7 +130,7 @@ class FeeRepository {
         INNER JOIN students
             ON fee_records.student_id = students.id
         WHERE students.user_id = $1
-        ORDER BY fee_records.id;
+        ORDER BY ${sortColumn} ${sortOrder};
     `;
 
         const result = await pool.query(query, [userId]);
@@ -271,18 +358,6 @@ class FeeRepository {
         return result.rows[0];
     }
 
-    async findPaymentsByFeeId(feeId) {
-
-        const query = `
-        SELECT id
-        FROM payments
-        WHERE fee_id = $1;
-    `;
-
-        const result = await pool.query(query, [feeId]);
-
-        return result.rows;
-    }
 
     async delete(id) {
 

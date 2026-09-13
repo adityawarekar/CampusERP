@@ -82,21 +82,52 @@ class HostelAllocationService {
             );
     }
 
-    async getAllAllocations() {
-        return await hostelAllocationRepository
-            .findAll();
+    async getAllAllocations(
+        page = 1,
+        limit = 10,
+        studentId = null,
+        roomId = null,
+        status = null,
+        search = null
+    ) {
+
+        const offset = (page - 1) * limit;
+
+        const [allocations, total] = await Promise.all([
+            hostelAllocationRepository.findAll(
+                limit,
+                offset,
+                studentId,
+                roomId,
+                status,
+                search
+            ),
+            hostelAllocationRepository.countAll(
+                studentId,
+                roomId,
+                status,
+                search
+            )
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+
+        return {
+            data: allocations,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages
+            }
+        };
     }
 
     async getAllAllocationById(id) {
 
-        console.log("1️⃣ Service started:", id);
         const allocation =
             await hostelAllocationRepository.findById(id);
 
-        console.log(
-            "2️⃣ Repository returned:",
-            allocation
-        );
         if (!allocation) {
             throw new Error(
                 "Hostel allocation not found"

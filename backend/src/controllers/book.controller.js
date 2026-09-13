@@ -2,22 +2,45 @@ import bookService from "../services/book.service.js";
 
 class BookController {
     async getAllBooks(req, res) {
+
         try {
-            const books =
-                await bookService.getAllBooks();
+
+            const page =
+                parseInt(req.query.page) || 1;
+
+            const limit =
+                parseInt(req.query.limit) || 10;
+
+            const search =
+                req.query.search || null;
+
+            const sortBy = req.query.sortBy || null;
+            const order = req.query.order || null;
+
+            const result =
+                await bookService.getAllBooks(
+                    page,
+                    limit,
+                    search,
+                    sortBy,
+                    order
+                );
 
             return res.status(200).json({
                 success: true,
                 message: "Books fetched successfully",
-                data: books
+                data: result.data,
+                pagination: result.pagination
             });
+
         } catch (error) {
+
             return res.status(500).json({
                 success: false,
                 message: error.message
             });
-        }
 
+        }
     }
 
     async createBook(req, res) {
@@ -162,46 +185,46 @@ class BookController {
 
     async deleteBook(req, res) {
 
-    try {
+        try {
 
-        const { id } = req.params;
+            const { id } = req.params;
 
-        const book =
-            await bookService.deleteBook(id);
+            const book =
+                await bookService.deleteBook(id);
 
-        return res.status(200).json({
-            success: true,
-            message: "Book deleted successfully",
-            data: book
-        });
+            return res.status(200).json({
+                success: true,
+                message: "Book deleted successfully",
+                data: book
+            });
 
-    } catch (error) {
+        } catch (error) {
 
-        if (error.message === "Book not found") {
+            if (error.message === "Book not found") {
 
-            return res.status(404).json({
+                return res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+
+            if (
+                error.message ===
+                "Cannot delete book while copies are issued"
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+
+            return res.status(500).json({
                 success: false,
                 message: error.message
             });
         }
-
-        if (
-            error.message ===
-            "Cannot delete book while copies are issued"
-        ) {
-
-            return res.status(400).json({
-                success: false,
-                message: error.message
-            });
-        }
-
-        return res.status(500).json({
-            success: false,
-            message: error.message
-        });
     }
-}
 }
 
 export default new BookController();

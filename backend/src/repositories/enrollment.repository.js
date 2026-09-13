@@ -54,9 +54,23 @@ class EnrollmentRepository {
         }
     }
 
-    async findAll() {
+    async findAll(
+    limit,
+    offset,
+    studentId,
+    courseId,
+    sortBy,
+    order
+) {
+    const ALLOWED_SORT_COLUMNS = {
+        enrolledAt: "enrollments.enrolled_at",
+        id: "enrollments.id"
+    };
 
-        const query = `
+    const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "enrollments.enrolled_at";
+    const sortOrder = order && order.toString().toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+    const query = `
         SELECT
             enrollments.id,
 
@@ -79,15 +93,66 @@ class EnrollmentRepository {
         INNER JOIN courses
             ON enrollments.course_id = courses.id
 
-        ORDER BY enrollments.enrolled_at DESC;
+        WHERE
+            (
+                $3::integer IS NULL
+                OR enrollments.student_id = $3::integer
+            )
+            AND
+            (
+                $4::integer IS NULL
+                OR enrollments.course_id = $4::integer
+            )
+
+        ORDER BY ${sortColumn} ${sortOrder}
+        LIMIT $1
+        OFFSET $2
     `;
 
-        const result = await pool.query(query);
+    const result = await pool.query(
+        query,
+        [limit, offset, studentId, courseId]
+    );
 
-        return result.rows;
+    return result.rows;
+}
+
+    async countAll(studentId, courseId) {
+        const query = `
+            SELECT COUNT(*)
+            FROM enrollments
+            INNER JOIN students ON enrollments.student_id = students.id
+            INNER JOIN courses ON enrollments.course_id = courses.id
+            WHERE
+                ($1::integer IS NULL OR enrollments.student_id = $1::integer)
+                AND
+                ($2::integer IS NULL OR enrollments.course_id = $2::integer)
+        `;
+
+        const result = await pool.query(query, [studentId, courseId]);
+        return parseInt(result.rows[0].count, 10);
     }
 
-    async findAllByUserId(userId) {
+    async countAllByUserId(userId) {
+        const query = `
+            SELECT COUNT(*)
+            FROM enrollments
+            INNER JOIN students ON enrollments.student_id = students.id
+            WHERE students.user_id = $1
+        `;
+
+        const result = await pool.query(query, [userId]);
+        return parseInt(result.rows[0].count, 10);
+    }
+
+    async findAllByUserId(userId,limit, offset, sortBy, order) {
+        const ALLOWED_SORT_COLUMNS = {
+            enrolledAt: "enrollments.enrolled_at",
+            id: "enrollments.id"
+        };
+
+        const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "enrollments.enrolled_at";
+        const sortOrder = order && order.toString().toUpperCase() === "ASC" ? "ASC" : "DESC";
 
         const query = `
         SELECT
@@ -114,12 +179,14 @@ class EnrollmentRepository {
 
         WHERE students.user_id = $1
 
-        ORDER BY enrollments.enrolled_at DESC;
+        ORDER BY ${sortColumn} ${sortOrder}
+        LIMIT $2
+        OFFSET $3;
     `;
 
         const result = await pool.query(
             query,
-            [userId]
+            [userId, limit, offset]
         );
 
         return result.rows;

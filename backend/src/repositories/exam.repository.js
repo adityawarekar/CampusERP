@@ -2,7 +2,15 @@ import pool from "../config/db.js";
 
 class ExamRepository {
 
-    async findAll(limit, offset, courseId, search) {
+    async findAll(limit, offset, courseId, search, sortBy, order) {
+        const ALLOWED_SORT_COLUMNS = {
+            examName: "exams.exam_name",
+            examDate: "exams.exam_date",
+            maxMarks: "exams.max_marks"
+        };
+
+        const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "exams.exam_date";
+        const sortOrder = order && order.toString().toUpperCase() === "DESC" ? "DESC" : "ASC";
 
         const query = `
         SELECT
@@ -31,7 +39,7 @@ class ExamRepository {
                 OR exams.exam_name ILIKE '%' || $4::text || '%'
             )
 
-        ORDER BY exams.exam_date
+        ORDER BY ${sortColumn} ${sortOrder}
         LIMIT $1
         OFFSET $2
     `;
@@ -42,6 +50,32 @@ class ExamRepository {
         );
 
         return result.rows;
+    }
+
+    async countAll(courseId, search) {
+        const query = `
+            SELECT COUNT(*)
+            FROM exams
+            INNER JOIN courses
+                ON exams.course_id = courses.id
+            WHERE
+                (
+                    $1::integer IS NULL
+                    OR exams.course_id = $1::integer
+                )
+                AND
+                (
+                    $2::text IS NULL
+                    OR exams.exam_name ILIKE '%' || $2::text || '%'
+                )
+        `;
+
+        const result = await pool.query(
+            query,
+            [courseId, search]
+        );
+
+        return parseInt(result.rows[0].count, 10);
     }
 
     async findById(id) {

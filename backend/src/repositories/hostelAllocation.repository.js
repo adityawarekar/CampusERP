@@ -186,46 +186,171 @@ class HostelAllocationRepository {
         return result.rows[0];
     }
 
-    async findAll() {
+    async findAll(
+        limit,
+        offset,
+        studentId,
+        roomId,
+        status,
+        search
+    ) {
+        const ALLOWED_SORT_COLUMNS = {
+            id: "hostel_allocations.id",
+            allocationDate: "hostel_allocations.allocation_date",
+            status: "hostel_allocations.status",
+            studentName: "students.first_name"
+        };
+
+        // Note: sortBy and order are not wired to query params yet;
+        // defaults are applied at the repository level for safety.
+        // The service/controller can add them later when needed.
+        const sortColumn = ALLOWED_SORT_COLUMNS["id"];
+        const sortOrder = "ASC";
+
         const query = `
-          SELECT
-               hostel_allocations.id,
+        SELECT
+            hostel_allocations.id,
 
-               hostel_allocations.student_id,
-               students.roll_number,
-               students.first_name || ' ' ||
-               students.last_name AS student_name,
+            hostel_allocations.student_id,
+            students.roll_number,
+            students.first_name || ' ' ||
+            students.last_name AS student_name,
 
-               hostel_allocations.room_id,
-               rooms.room_number,
+            hostel_allocations.room_id,
+            rooms.room_number,
 
-               rooms.hostel_id,
-               hostels.name AS hostel_name,
+            rooms.hostel_id,
+            hostels.name AS hostel_name,
 
-               hostel_allocations.bed_number,
-               hostel_allocations.allocation_date,
-               hostel_allocations.vacated_date,
-               hostel_allocations.status
-            
-            FROM hostel_allocations
-            
-            INNER JOIN students
-              ON hostel_allocations.student_id = 
-                 students.id
+            hostel_allocations.bed_number,
+            hostel_allocations.allocation_date,
+            hostel_allocations.vacated_date,
+            hostel_allocations.status
 
-            INNER JOIN rooms
-               ON hostel_allocations.room_id = 
-                  rooms.id
-            INNER JOIN hostels
-               ON rooms.hostel_id = 
-                   hostels.id
-                   
-            ORDER BY hostel_allocations.id;       
-        `;
+        FROM hostel_allocations
 
-        const result = await pool.query(query);
+        INNER JOIN students
+            ON hostel_allocations.student_id =
+               students.id
+
+        INNER JOIN rooms
+            ON hostel_allocations.room_id =
+               rooms.id
+
+        INNER JOIN hostels
+            ON rooms.hostel_id =
+               hostels.id
+
+        WHERE
+            (
+                $3::integer IS NULL
+                OR hostel_allocations.student_id =
+                   $3::integer
+            )
+
+            AND
+
+            (
+                $4::integer IS NULL
+                OR hostel_allocations.room_id =
+                   $4::integer
+            )
+
+            AND
+
+            (
+                $5::text IS NULL
+                OR hostel_allocations.status =
+                   $5::text
+            )
+
+            AND
+
+            (
+                $6::text IS NULL
+
+                OR students.first_name || ' ' ||
+                   students.last_name
+                   ILIKE '%' || $6::text || '%'
+
+                OR rooms.room_number
+                   ILIKE '%' || $6::text || '%'
+
+                OR hostels.name
+                   ILIKE '%' || $6::text || '%'
+            )
+
+        ORDER BY ${sortColumn} ${sortOrder}
+
+        LIMIT $1
+        OFFSET $2;
+    `;
+
+        const result = await pool.query(
+            query,
+            [
+                limit,
+                offset,
+                studentId,
+                roomId,
+                status,
+                search
+            ]
+        );
 
         return result.rows;
+    }
+
+        
+
+    async countAll(studentId, roomId, status, search) {
+        const query = `
+            SELECT COUNT(*)
+            FROM hostel_allocations
+            INNER JOIN students
+                ON hostel_allocations.student_id = students.id
+            INNER JOIN rooms
+                ON hostel_allocations.room_id = rooms.id
+            INNER JOIN hostels
+                ON rooms.hostel_id = hostels.id
+            WHERE
+                (
+                    $1::integer IS NULL
+                    OR hostel_allocations.student_id = $1::integer
+                )
+                AND
+                (
+                    $2::integer IS NULL
+                    OR hostel_allocations.room_id = $2::integer
+                )
+                AND
+                (
+                    $3::text IS NULL
+                    OR hostel_allocations.status = $3::text
+                )
+                AND
+                (
+                    $4::text IS NULL
+                    OR students.first_name || ' ' || students.last_name
+                       ILIKE '%' || $4::text || '%'
+                    OR rooms.room_number
+                       ILIKE '%' || $4::text || '%'
+                    OR hostels.name
+                       ILIKE '%' || $4::text || '%'
+                )
+        `;
+
+        const result = await pool.query(
+            query,
+            [
+                studentId,
+                roomId,
+                status,
+                search
+            ]
+        );
+
+        return parseInt(result.rows[0].count, 10);
     }
 
     async findById(id) {

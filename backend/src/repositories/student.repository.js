@@ -2,7 +2,17 @@ import pool from "../config/db.js";
 
 class StudentRepository {
 
-    async findAll(limit, offset, departmentId, search) {
+    async findAll(limit, offset, departmentId, search, sortBy, order) {
+        const ALLOWED_SORT_COLUMNS = {
+            rollNumber: "students.roll_number",
+            firstName: "students.first_name",
+            lastName: "students.last_name",
+            email: "students.email",
+            createdAt: "students.created_at"
+        };
+
+        const sortColumn = ALLOWED_SORT_COLUMNS[sortBy] || "students.roll_number";
+        const sortOrder = order && order.toString().toUpperCase() === "DESC" ? "DESC" : "ASC";
 
         const query = `
         SELECT
@@ -22,7 +32,7 @@ class StudentRepository {
                 OR students.first_name || ' ' || students.last_name ILIKE '%' || $4::text || '%'
                 OR students.email ILIKE '%' || $4::text || '%'
             )
-        ORDER BY students.roll_number
+        ORDER BY ${sortColumn} ${sortOrder}
         LIMIT $1
         OFFSET $2
     `;
@@ -33,6 +43,30 @@ class StudentRepository {
         );
 
         return result.rows;
+    }
+
+    async countAll(departmentId, search) {
+        const query = `
+            SELECT COUNT(*)
+            FROM students
+            INNER JOIN departments
+            ON students.department_id = departments.id
+            WHERE
+                ($1::integer IS NULL OR students.department_id = $1::integer)
+                AND
+                (
+                    $2::text IS NULL
+                    OR students.first_name || ' ' || students.last_name ILIKE '%' || $2::text || '%'
+                    OR students.email ILIKE '%' || $2::text || '%'
+                )
+        `;
+
+        const result = await pool.query(
+            query,
+            [departmentId, search]
+        );
+
+        return parseInt(result.rows[0].count, 10);
     }
 
     async findById(id) {

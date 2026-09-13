@@ -44,16 +44,42 @@ class EnrollmentController {
 
         try {
 
-            const enrollments =
+            const page =
+                parseInt(req.query.page) || 1;
+
+            const limit =
+                parseInt(req.query.limit) || 10;
+
+            const studentId =
+                req.query.studentId
+                    ? parseInt(req.query.studentId)
+                    : null;
+
+            const courseId =
+                req.query.courseId
+                    ? parseInt(req.query.courseId)
+                    : null;
+
+            const sortBy = req.query.sortBy || null;
+            const order = req.query.order || null;
+
+            const result =
                 await enrollmentService.getAllEnrollments(
                     req.user.id,
-                    req.user.role
+                    req.user.role,
+                    page,
+                    limit,
+                    studentId,
+                    courseId,
+                    sortBy,
+                    order
                 );
 
             return res.status(200).json({
                 success: true,
                 message: "Enrollments fetched successfully",
-                data: enrollments
+                data: result.data,
+                pagination: result.pagination
             });
 
         } catch (error) {
@@ -64,7 +90,6 @@ class EnrollmentController {
             });
 
         }
-
     }
 
     async getEnrollmentById(req, res) {
