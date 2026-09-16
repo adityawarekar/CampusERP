@@ -44,7 +44,7 @@ class FeeService {
     }
 
     const [fees, total] = await Promise.all([
-        feeRepository.findAllByUserId(userId, sortBy, order),
+        feeRepository.findAllByUserId(userId, limit, offset, sortBy, order),
         feeRepository.countAllByUserId(userId)
     ]);
 

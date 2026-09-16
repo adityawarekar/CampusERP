@@ -80,6 +80,9 @@ class HostleAllocationController {
             const search =
                 req.query.search || null;
 
+            const sortBy = req.query.sortBy || null;
+            const order = req.query.order || null;    
+
             const result =
                 await hostelAllocationService
                     .getAllAllocations(
@@ -88,7 +91,9 @@ class HostleAllocationController {
                         studentId,
                         roomId,
                         status,
-                        search
+                        search,
+                        sortBy,
+                        order
                     );
 
             return res.status(200).json({

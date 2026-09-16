@@ -192,7 +192,9 @@ class HostelAllocationRepository {
         studentId,
         roomId,
         status,
-        search
+        search,
+        sortBy,
+        order
     ) {
         const ALLOWED_SORT_COLUMNS = {
             id: "hostel_allocations.id",
@@ -204,8 +206,15 @@ class HostelAllocationRepository {
         // Note: sortBy and order are not wired to query params yet;
         // defaults are applied at the repository level for safety.
         // The service/controller can add them later when needed.
-        const sortColumn = ALLOWED_SORT_COLUMNS["id"];
-        const sortOrder = "ASC";
+        const sortColumn =
+            ALLOWED_SORT_COLUMNS[sortBy] ||
+            "hostel_allocations.id";
+
+        const sortOrder =
+            order &&
+                order.toString().toUpperCase() === "DESC"
+                ? "DESC"
+                : "ASC";
 
         const query = `
         SELECT
@@ -301,10 +310,11 @@ class HostelAllocationRepository {
         return result.rows;
     }
 
-        
+
 
     async countAll(studentId, roomId, status, search) {
         const query = `
+
             SELECT COUNT(*)
             FROM hostel_allocations
             INNER JOIN students

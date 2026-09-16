@@ -103,7 +103,7 @@ class FeeRepository {
         return parseInt(result.rows[0].count, 10);
     }
 
-    async findAllByUserId(userId, sortBy, order) {
+    async findAllByUserId(userId, limit, offset, sortBy, order) {
         const ALLOWED_SORT_COLUMNS = {
             id: "fee_records.id",
             totalAmount: "fee_records.total_amount",
@@ -130,10 +130,15 @@ class FeeRepository {
         INNER JOIN students
             ON fee_records.student_id = students.id
         WHERE students.user_id = $1
-        ORDER BY ${sortColumn} ${sortOrder};
+        ORDER BY ${sortColumn} ${sortOrder}
+        LIMIT $2
+        OFFSET $3;
     `;
 
-        const result = await pool.query(query, [userId]);
+        const result = await pool.query(
+            query,
+            [userId, limit, offset]
+        );
 
         return result.rows;
     }

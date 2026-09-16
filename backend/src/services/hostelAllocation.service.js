@@ -88,7 +88,9 @@ class HostelAllocationService {
         studentId = null,
         roomId = null,
         status = null,
-        search = null
+        search = null,
+        sortBy = null,
+        order = null
     ) {
 
         const offset = (page - 1) * limit;
@@ -100,7 +102,9 @@ class HostelAllocationService {
                 studentId,
                 roomId,
                 status,
-                search
+                search,
+                sortBy,
+                order
             ),
             hostelAllocationRepository.countAll(
                 studentId,
