@@ -12,6 +12,9 @@ import validate from "../middleware/validation.middleware.js";
 import {
     createEnrollmentSchema
 } from "../validators/enrollment.validator.js";
+import {
+    enrollmentQuerySchema
+} from "../validators/enrollmentQuery.validator.js";
 
 
 const router = Router();
@@ -33,6 +36,10 @@ router.get(
         "ADMIN",
         "FACULTY",
         "STUDENT"
+    ),
+    validate(
+        enrollmentQuerySchema,
+        "query"
     ),
     enrollmentController.getAllEnrollments
 );

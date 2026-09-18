@@ -11,6 +11,9 @@ import validate
 import {
     createBookIssueSchema
 } from "../validators/bookIssue.validator.js";
+import {
+    bookIssueQuerySchema
+} from "../validators/bookIssueQuery.validator.js";
 
 const router = Router();
 
@@ -20,6 +23,10 @@ router.get(
     roleMiddleware(
         "ADMIN",
         "LIBRARY_STAFF"
+    ),
+    validate(
+        bookIssueQuerySchema,
+        "query"
     ),
     bookIssueController.getAllBookIssues
 );

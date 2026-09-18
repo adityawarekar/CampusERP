@@ -11,6 +11,9 @@ import {
     createRoomSchema,
     updateRoomSchema
 } from "../validators/room.validator.js";
+import {
+    roomQuerySchema
+} from "../validators/roomQuery.validator.js";
 
 const router = Router();
 
@@ -22,6 +25,10 @@ router.get(
         "HOSTEL_STAFF",
         "STUDENT"
     ),
+    validate(
+    roomQuerySchema,
+    "query"
+),
     roomController.getAllRooms
 );
 

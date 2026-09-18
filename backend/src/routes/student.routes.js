@@ -9,11 +9,14 @@ import validate from "../middleware/validation.middleware.js";
 import {
     createStudentSchema,
     updateStudentSchema
-} from "../validators/student.validator.js";    
+} from "../validators/student.validator.js";
+import {
+    studentQuerySchema
+} from "../validators/studentQuery.validator.js";    
 
 const router = Router();
 
-router.get("/", authMiddleware, roleMiddleware("ADMIN"), studentController.getAllStudents);
+router.get("/", authMiddleware, roleMiddleware("ADMIN"), validate(studentQuerySchema, "query"), studentController.getAllStudents);
 router.get(
     "/:id",
     authMiddleware,

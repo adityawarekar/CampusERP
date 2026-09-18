@@ -12,6 +12,10 @@ import {
     updateBookSchema
 } from "../validators/book.validator.js";
 
+
+import {
+    bookQuerySchema
+} from "../validators/bookQuery.validator.js";
 const router = Router();
 
 router.get(
@@ -22,6 +26,10 @@ router.get(
         "LIBRARY_STAFF",
         "STUDENT"
     ),
+    validate(
+    bookQuerySchema,
+    "query"
+),
     bookController.getAllBooks
 );
 

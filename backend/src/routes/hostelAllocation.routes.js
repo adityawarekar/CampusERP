@@ -12,15 +12,18 @@ import studentOwnershipMiddleware
     from "../middleware/studentOwnership.middleware.js";
 
 import hostelAllocationOwnershipMiddleware
-    from "../middleware/hostelAllocationOwnership.middleware.js";  
-    
+    from "../middleware/hostelAllocationOwnership.middleware.js";
+
 import validate
     from "../middleware/validation.middleware.js";
 
 import {
     createHostelAllocationSchema
-} from "../validators/hostelAllocation.validator.js";    
+} from "../validators/hostelAllocation.validator.js";
 const router = Router();
+import {
+    hostelAllocationQuerySchema
+} from "../validators/hostelAllocationQuery.validator.js";
 
 router.get(
     "/",
@@ -28,6 +31,10 @@ router.get(
     roleMiddleware(
         "ADMIN",
         "HOSTEL_STAFF"
+    ),
+    validate(
+        hostelAllocationQuerySchema,
+        "query"
     ),
     hostelAllocationController.getAllAllocations
 );

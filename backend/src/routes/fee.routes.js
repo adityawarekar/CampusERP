@@ -7,6 +7,9 @@ import roleMiddleware from "../middleware/role.middleware.js";
 import feeOwnershipMiddleware from "../middleware/feeOwnership.middleware.js";
 import paymentOwnershipMiddleware from "../middleware/paymentOwnership.middleware.js";
 import validate from "../middleware/validation.middleware.js";
+import {
+    feeQuerySchema
+} from "../validators/feeQuery.validator.js";
 
 import {
     createFeeSchema,
@@ -21,6 +24,10 @@ router.get(
     roleMiddleware(
         "ADMIN",
         "STUDENT"
+    ),
+    validate(
+        feeQuerySchema,
+        "query"
     ),
     feeController.getAllFees
 );

@@ -3,6 +3,10 @@ import attendanceController from "../controllers/attendance.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import roleMiddleware from "../middleware/role.middleware.js";
 import attendanceOwnershipMiddleware from "../middleware/attendanceOwnership.middleware.js";
+import validate from "../middleware/validation.middleware.js";
+import {
+    attendanceQuerySchema
+} from "../validators/attendanceQuery.validator.js";
 
 const router = Router();
 
@@ -12,6 +16,10 @@ router.get(
     roleMiddleware(
         "ADMIN",
         "FACULTY"
+    ),
+    validate(
+        attendanceQuerySchema,
+        "query"
     ),
     attendanceController.getAllAttendance
 );

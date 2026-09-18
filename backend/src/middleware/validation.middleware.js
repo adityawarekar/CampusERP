@@ -1,23 +1,38 @@
-const validate = (schema) => {
+const validate = (schema, source = "body") => {
+
     return (req, res, next) => {
+
         const { error, value } = schema.validate(
-            req.body,
+            req[source],
             {
                 abortEarly: false
             }
         );
+
         if (error) {
+
             return res.status(400).json({
+
                 success: false,
+
                 message: "Validation failed",
+
                 errors: error.details.map(
                     (detail) => detail.message
                 )
+
             });
+
         }
-        req.body = value;
+
+        if (source === "body") {
+            req.body = value;
+        }
+
         next();
+
     };
+
 };
 
 export default validate;

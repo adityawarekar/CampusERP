@@ -11,6 +11,10 @@ import {
     updateExamSchema
 } from "../validators/exam.validator.js";
 
+import {
+    examQuerySchema
+} from "../validators/examQuery.validator.js";
+
 const router = Router();
 
 router.get(
@@ -21,6 +25,7 @@ router.get(
         "FACULTY",
         "STUDENT"
     ),
+    validate(examQuerySchema, "query"),
     examController.getAllExams
 );
 
