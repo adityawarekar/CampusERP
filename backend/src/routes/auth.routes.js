@@ -9,16 +9,19 @@ import {
     registerSchema,
     loginSchema
 } from "../validators/auth.validator.js";
+import { authRateLimiter } from "../middleware/rateLimit.middleware.js";
 
 const router = Router();
 
 router.post(
     "/register",
+    authRateLimiter,
     validate(registerSchema),
     userController.registerUser
 );
 router.post(
     "/login",
+    authRateLimiter,
     validate(loginSchema),
     userController.loginUser
 )

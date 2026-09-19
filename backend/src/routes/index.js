@@ -33,4 +33,5 @@ router.use("/hostel-allocations", hostelAllocationRoutes);
 router.use("/auth", authRoutes);
 
 
+
 export default router;
