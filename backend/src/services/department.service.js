@@ -9,14 +9,10 @@ class DepartmentService {
         return await departmentRepository.findById(id);
     }
 
-    async createDepartment(data) {
-        return await departmentRepository.create(data);
-    }
-
     async createDepartment(name, code) {
-        const existingDepartment =
-            await departmentRepository.findByCode(code);
-
+        const existingDepartment = 
+           await departmentRepository.findByCode(code);
+        
         if (existingDepartment) {
             throw new Error("Department code already exists");
         }
@@ -25,14 +21,14 @@ class DepartmentService {
     }
 
     async updateDepartment(id, name, code) {
-        const department =
+        const department = 
             await departmentRepository.findById(id);
-
+        
         if (!department) {
             throw new Error("Department not found");
         }
-
-        const existingDepartment =
+        
+        const existingDepartment = 
             await departmentRepository.findByCode(code);
 
         if (
@@ -41,7 +37,7 @@ class DepartmentService {
         ) {
             throw new Error("Department code already exists");
         }
-
+        
         return await departmentRepository.update(
             id,
             name,
@@ -51,14 +47,14 @@ class DepartmentService {
 
     async deleteDepartment(id) {
 
-        const department =
+        const department = 
             await departmentRepository.findById(id);
 
-        if (!department) {
-            throw new Error("Department not found");
-        }
+            if (!department) {
+                throw new Error("Department not found");
+            }
 
-        return await departmentRepository.delete(id);
+            return await departmentRepository.delete(id);
 
     }
 

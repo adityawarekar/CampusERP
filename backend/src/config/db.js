@@ -23,4 +23,10 @@ export const connectDB = async () => {
     }
 };
 
+export const closeDB = async () => {
+
+    await pool.end();
+
+};
+
 export default pool;

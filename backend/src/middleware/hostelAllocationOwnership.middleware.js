@@ -11,7 +11,7 @@ const hostelAllocationOwnershipMiddleware = async (
         const allocationId =
             Number(req.params.id);
 
-        // ADMIN and HOSTEL_STAFF can access any allocation
+       
         if (
             req.user.role === "ADMIN" ||
             req.user.role === "HOSTEL_STAFF"
@@ -19,7 +19,7 @@ const hostelAllocationOwnershipMiddleware = async (
             return next();
         }
 
-        // Find which student owns this allocation
+        
         const result = await pool.query(
             `
             SELECT ha.student_id
