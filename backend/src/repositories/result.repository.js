@@ -143,7 +143,10 @@ class ResultRepository {
 
         WHERE students.user_id = $1
 
-        ORDER BY ${sortColumn} ${sortOrder};
+        ORDER BY ${sortColumn} ${sortOrder}
+
+        LIMIT $2
+        OFFSET $3;
     `;
 
         const result = await pool.query(

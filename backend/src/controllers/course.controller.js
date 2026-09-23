@@ -136,10 +136,14 @@ class CourseController {
 
         } catch (error) {
 
-            if (
-                error.message === "Course not found" ||
-                error.message === "Course code already exists"
-            ) {
+            if (error.message === "Course not found") {
+                return res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+
+            if (error.message === "Course code already exists") {
                 return res.status(400).json({
                     success: false,
                     message: error.message
