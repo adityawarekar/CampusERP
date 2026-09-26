@@ -10,9 +10,7 @@ import {
 
 describe("Enrollments API", () => {
 
-    // --------------------------------------------------
-    // GET ALL ENROLLMENTS
-    // --------------------------------------------------
+    
 
     test("should return all enrollments for student", async () => {
 
@@ -53,9 +51,7 @@ describe("Enrollments API", () => {
     });
 
 
-    // --------------------------------------------------
-    // CREATE ENROLLMENT
-    // --------------------------------------------------
+    
 
     test("should reject student from creating an enrollment", async () => {
 
@@ -108,10 +104,7 @@ describe("Enrollments API", () => {
     });
 
 
-    // --------------------------------------------------
-    // GET ENROLLMENT BY ID
-    // --------------------------------------------------
-
+   
     test("should return 404 for non-existent enrollment", async () => {
 
         const token = await getAdminToken();
@@ -137,9 +130,7 @@ describe("Enrollments API", () => {
     });
 
 
-    // --------------------------------------------------
-    // DELETE ENROLLMENT
-    // --------------------------------------------------
+    
 
     test("should reject student from deleting an enrollment", async () => {
 
